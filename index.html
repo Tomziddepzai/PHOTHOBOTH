@@ -5,546 +5,819 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>FOTOGRAM ✦</title>
+<title>FOTOGRAM</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono&family=Bebas+Neue&display=swap');
-  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  :root{--bg:#06060e;--accent:#b8d4ff;--gold:#f0d080}
-  html,body{width:100%;height:100%;overflow:hidden;touch-action:none}
-  body{
-    background:var(--bg);color:var(--accent);
-    font-family:'Space Mono',monospace;
-    display:flex;flex-direction:column;
-    align-items:center;justify-content:center;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Bebas+Neue&display=swap');
 
-  /* ── Stage ── */
-  #stage{
-    position:relative;
-    width:100vw;height:100vh;
-    display:flex;align-items:center;justify-content:center;
-    overflow:hidden;
-  }
-  #videoEl{
-    position:absolute;opacity:0;pointer-events:none;
-    /* will be sized dynamically */
-  }
-  #mainCanvas{
-    display:block;
-    /* sized by JS to fill screen letterboxed */
-    max-width:100vw;max-height:100vh;
-    touch-action:none;
-  }
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { width:100%; height:100%; overflow:hidden; background:#080810; touch-action:none; }
 
-  /* ── Header ── */
-  #hud{
-    position:fixed;top:0;left:0;right:0;
-    padding:max(env(safe-area-inset-top),12px) 18px 10px;
-    display:flex;justify-content:space-between;align-items:center;
-    z-index:50;pointer-events:none;
-  }
-  .logo{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.2em;color:var(--accent)}
-  .logo span{color:var(--gold)}
-  #statusText{font-size:.5rem;letter-spacing:.18em;text-transform:uppercase;opacity:.55}
+/* ═══════════════════════════════════════
+   INTRO PAGE
+═══════════════════════════════════════ */
+#intro {
+  position:fixed; inset:0; z-index:1000;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  background:#080810;
+  transition: opacity .8s ease, visibility .8s;
+}
+#intro.out { opacity:0; visibility:hidden; pointer-events:none; }
 
-  /* ── Bottom bar ── */
-  #bar{
-    position:fixed;bottom:0;left:0;right:0;
-    padding:10px 16px max(env(safe-area-inset-bottom),14px);
-    display:flex;justify-content:center;align-items:center;gap:10px;
-    z-index:50;
-  }
-  .btn{
-    background:rgba(180,210,255,.06);
-    border:1px solid rgba(180,210,255,.22);
-    color:var(--accent);font-family:'Space Mono',monospace;
-    font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;
-    padding:9px 16px;cursor:pointer;border-radius:2px;
-    transition:background .2s,border-color .2s;
-    -webkit-appearance:none;
-  }
-  .btn:active{background:rgba(180,210,255,.18)}
-  .btn.danger{border-color:rgba(255,100,100,.3);color:rgba(255,150,150,.85)}
-  .btn.danger:active{background:rgba(255,60,60,.12)}
+.intro-bg {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 30%, rgba(60,80,180,.18) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 80% 70%, rgba(120,60,160,.14) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 60% 20%, rgba(40,100,200,.10) 0%, transparent 60%);
+}
 
-  /* ── Auto-capture ring (shown on canvas, but CSS hint) ── */
-  #autoHint{
-    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-    font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;
-    opacity:0;transition:opacity .3s;pointer-events:none;z-index:60;
-    color:var(--gold);text-align:center;
-  }
-  #autoHint.show{opacity:.7}
+/* Animated grain */
+.intro-bg::after {
+  content:''; position:absolute; inset:-50%;
+  width:200%; height:200%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:.035; animation: grain 1.2s steps(2) infinite;
+}
+@keyframes grain {
+  0%   { transform: translate(0,0); }
+  25%  { transform: translate(-2%,-3%); }
+  50%  { transform: translate(3%,1%); }
+  75%  { transform: translate(-1%,3%); }
+  100% { transform: translate(2%,-1%); }
+}
 
-  /* ── Overlay ── */
-  #overlay{
-    position:fixed;inset:0;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;
-    background:var(--bg);z-index:200;gap:12px;transition:opacity .4s;
-  }
-  #overlay.hidden{opacity:0;pointer-events:none}
-  .ot{
-    font-family:'Bebas Neue',sans-serif;
-    font-size:clamp(2.8rem,12vw,5.5rem);
-    letter-spacing:.1em;color:var(--accent);text-align:center;line-height:.92;
-  }
-  .ot span{color:var(--gold)}
-  .os{font-size:.55rem;letter-spacing:.28em;text-transform:uppercase;opacity:.4}
-  .how{
-    margin-top:4px;background:rgba(180,210,255,.04);
-    border:1px solid rgba(180,210,255,.13);border-radius:3px;
-    padding:13px 20px;font-size:.55rem;line-height:2.1;
-    letter-spacing:.03em;opacity:.75;max-width:290px;
-  }
-  .how b{color:var(--gold)}
-  .sbtn{
-    margin-top:8px;background:transparent;
-    border:1px solid rgba(180,210,255,.4);color:var(--accent);
-    font-family:'Space Mono',monospace;font-size:.62rem;
-    letter-spacing:.2em;text-transform:uppercase;
-    padding:12px 30px;cursor:pointer;border-radius:2px;
-    animation:pulse 2.4s ease-in-out infinite;-webkit-appearance:none;
-  }
-  @keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+.intro-logo {
+  position:relative;
+  font-family:'Bebas Neue',sans-serif;
+  font-size: clamp(5rem,18vw,10rem);
+  letter-spacing:.12em;
+  color:transparent;
+  background: linear-gradient(135deg, #c8d8ff 0%, #8090c8 40%, #e8d0a0 70%, #c8d8ff 100%);
+  -webkit-background-clip: text; background-clip: text;
+  line-height:1;
+  animation: shimmer 4s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+@keyframes shimmer {
+  0%,100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
 
-  /* ── Flash ── */
-  #flash{
-    position:fixed;inset:0;background:#fff;opacity:0;
-    pointer-events:none;z-index:300;transition:opacity .06s;
-  }
-  #flash.go{opacity:.6}
+.intro-sub {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(.75rem,2.5vw,1rem);
+  letter-spacing:.55em;
+  color:rgba(180,200,255,.35);
+  text-transform:uppercase;
+  margin-top:-.5rem;
+  font-style:italic;
+}
 
-  /* ── Error box ── */
-  #errBox{
-    display:none;position:fixed;inset:0;
-    align-items:center;justify-content:center;
-    background:var(--bg);z-index:400;flex-direction:column;gap:14px;padding:30px;
-    text-align:center;
-  }
-  #errBox.show{display:flex}
-  #errMsg{font-size:.6rem;line-height:1.8;opacity:.7;max-width:300px}
-  #errTitle{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#ff8080;letter-spacing:.1em}
+/* Decorative lines */
+.intro-lines {
+  position:absolute; inset:0; pointer-events:none;
+  overflow:hidden;
+}
+.intro-lines::before, .intro-lines::after {
+  content:''; position:absolute;
+  border:1px solid rgba(160,180,255,.07);
+  border-radius:50%;
+  animation: breathe 6s ease-in-out infinite;
+}
+.intro-lines::before {
+  width:70vmax; height:70vmax;
+  top:50%; left:50%; transform:translate(-50%,-50%);
+}
+.intro-lines::after {
+  width:50vmax; height:50vmax;
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  animation-delay:-3s;
+}
+@keyframes breathe {
+  0%,100% { opacity:.4; transform:translate(-50%,-50%) scale(1); }
+  50%      { opacity:.8; transform:translate(-50%,-50%) scale(1.03); }
+}
 
-  /* Corners */
-  .c{position:fixed;width:28px;height:28px;border-color:rgba(180,210,255,.15);border-style:solid;z-index:60}
-  .c.tl{top:8px;left:8px;border-width:1px 0 0 1px}
-  .c.tr{top:8px;right:8px;border-width:1px 1px 0 0}
-  .c.bl{bottom:8px;left:8px;border-width:0 0 1px 1px}
-  .c.br{bottom:8px;right:8px;border-width:0 1px 1px 0}
+/* Corner marks */
+.mk { position:absolute; width:40px; height:40px; border-color:rgba(160,180,255,.18); border-style:solid; }
+.mk.tl { top:24px; left:24px; border-width:1px 0 0 1px; }
+.mk.tr { top:24px; right:24px; border-width:1px 1px 0 0; }
+.mk.bl { bottom:24px; left:24px; border-width:0 0 1px 1px; }
+.mk.br { bottom:24px; right:24px; border-width:0 1px 1px 0; }
+
+.intro-btn {
+  margin-top:3.5rem; position:relative;
+  background:transparent;
+  border:1px solid rgba(180,200,255,.3);
+  color:rgba(200,215,255,.7);
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(.8rem,2vw,.95rem);
+  letter-spacing:.35em; text-transform:uppercase;
+  padding:14px 42px; cursor:pointer; border-radius:1px;
+  transition: border-color .3s, color .3s, background .3s;
+  -webkit-appearance:none;
+}
+.intro-btn::before {
+  content:''; position:absolute; inset:-5px;
+  border:1px solid rgba(180,200,255,.06);
+  border-radius:2px;
+}
+.intro-btn:hover, .intro-btn:active {
+  border-color:rgba(200,220,255,.7);
+  color:rgba(220,235,255,.95);
+  background:rgba(160,180,255,.06);
+}
+
+/* ═══════════════════════════════════════
+   CAMERA PAGES (Shot1, Shot2)
+═══════════════════════════════════════ */
+#app {
+  position:fixed; inset:0; z-index:10;
+  display:none;
+  flex-direction:column; align-items:center; justify-content:center;
+}
+#app.active { display:flex; }
+
+#videoEl { position:absolute; opacity:0; pointer-events:none; }
+
+#mainCanvas {
+  display:block;
+  max-width:100vw; max-height:100vh;
+  touch-action:none;
+}
+
+/* HUD */
+#hud {
+  position:fixed; top:0; left:0; right:0;
+  padding:max(env(safe-area-inset-top),14px) 20px 10px;
+  display:flex; align-items:center; justify-content:space-between;
+  z-index:50; pointer-events:none;
+}
+.hud-label {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:.9rem; letter-spacing:.2em;
+  color:rgba(180,200,255,.6);
+}
+.hud-phase {
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:.7rem; letter-spacing:.2em;
+  color:rgba(180,200,255,.4);
+}
+
+/* Bottom bar */
+#bottomBar {
+  position:fixed; bottom:0; left:0; right:0;
+  padding:10px 20px max(env(safe-area-inset-bottom),14px);
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  z-index:50;
+}
+.cam-btn {
+  background:rgba(160,180,255,.06);
+  border:1px solid rgba(160,180,255,.2);
+  color:rgba(180,200,255,.7);
+  font-family:'Cormorant Garamond',serif;
+  font-size:.75rem; letter-spacing:.2em; text-transform:uppercase;
+  padding:9px 20px; cursor:pointer; border-radius:1px;
+  transition:all .2s; -webkit-appearance:none;
+}
+.cam-btn:active { background:rgba(160,180,255,.15); }
+.cam-btn.danger { border-color:rgba(255,100,100,.25); color:rgba(255,150,150,.7); }
+
+/* Flash */
+#flash {
+  position:fixed; inset:0; background:#fff; opacity:0;
+  pointer-events:none; z-index:900; transition:opacity .05s;
+}
+#flash.go { opacity:.55; }
+
+/* Timer ring - drawn on canvas, but overlay label */
+#timerLabel {
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+  font-family:'Bebas Neue',sans-serif; font-size:3.5rem;
+  color:rgba(240,210,130,.85); letter-spacing:.05em;
+  pointer-events:none; z-index:60;
+  opacity:0; transition:opacity .3s;
+  text-shadow: 0 0 40px rgba(240,210,130,.5);
+}
+#timerLabel.show { opacity:1; }
+
+/* Error */
+#errBox {
+  position:fixed; inset:0; background:#080810;
+  display:none; flex-direction:column;
+  align-items:center; justify-content:center; gap:16px;
+  z-index:950; padding:32px; text-align:center;
+}
+#errBox.show { display:flex; }
+#errBox h2 { font-family:'Bebas Neue',sans-serif; font-size:2rem; color:#ff8080; letter-spacing:.1em; }
+#errBox p  { font-family:'Cormorant Garamond',serif; font-size:.9rem; line-height:1.9; color:rgba(180,200,255,.6); max-width:280px; }
+
+/* ═══════════════════════════════════════
+   SAVE PAGE
+═══════════════════════════════════════ */
+#savePage {
+  position:fixed; inset:0; z-index:500;
+  display:none; flex-direction:column;
+  align-items:center; justify-content:center;
+  background:#080810;
+  transition:opacity .5s;
+}
+#savePage.active { display:flex; }
+
+.save-bg {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 50% 40% at 30% 60%, rgba(60,80,180,.12) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 50% at 75% 30%, rgba(100,50,140,.10) 0%, transparent 70%);
+}
+
+#resultCanvas {
+  max-width: min(90vw, 90vh * 1.333);
+  max-height: min(90vh, 90vw * 0.75);
+  border:1px solid rgba(160,180,255,.12);
+  border-radius:1px;
+  box-shadow: 0 0 60px rgba(100,120,200,.12), 0 0 120px rgba(80,80,160,.08);
+  display:block;
+}
+
+.save-actions {
+  display:flex; gap:12px; margin-top:20px;
+}
+.save-btn {
+  background:transparent;
+  border:1px solid rgba(160,180,255,.3);
+  color:rgba(200,215,255,.75);
+  font-family:'Cormorant Garamond',serif;
+  font-size:.8rem; letter-spacing:.25em; text-transform:uppercase;
+  padding:11px 28px; cursor:pointer; border-radius:1px;
+  transition:all .25s; -webkit-appearance:none;
+}
+.save-btn:active { background:rgba(160,180,255,.1); }
+.save-btn.primary {
+  background:rgba(160,180,255,.1);
+  border-color:rgba(180,200,255,.5);
+  color:rgba(220,235,255,.9);
+}
+.save-note {
+  font-family:'Cormorant Garamond',serif; font-style:italic;
+  font-size:.65rem; letter-spacing:.15em;
+  color:rgba(160,180,255,.3);
+  margin-top:12px;
+}
 </style>
 </head>
 <body>
-<div class="c tl"></div><div class="c tr"></div>
-<div class="c bl"></div><div class="c br"></div>
+
+<!-- ── FLASH ── -->
 <div id="flash"></div>
+<div id="timerLabel"></div>
 
-<!-- Error box -->
-<div id="errBox">
-  <div id="errTitle">CAMERA ERROR</div>
-  <div id="errMsg"></div>
-  <button class="sbtn" onclick="retryCamera()">↺ Thử lại</button>
-  <div style="font-size:.5rem;opacity:.35;margin-top:4px">
-    iOS: Cài từ Safari · Cho phép Camera trong Settings
-  </div>
+<!-- ══════════════════════════════
+     INTRO
+══════════════════════════════ -->
+<div id="intro">
+  <div class="intro-bg"></div>
+  <div class="intro-lines"></div>
+  <div class="mk tl"></div><div class="mk tr"></div>
+  <div class="mk bl"></div><div class="mk br"></div>
+
+  <div class="intro-logo">FOTOGRAM</div>
+  <div class="intro-sub">love</div>
+  <button class="intro-btn" onclick="startApp()">Bắt đầu</button>
 </div>
 
-<!-- Overlay intro -->
-<div id="overlay">
-  <div class="ot">FOTO<br><span>GRAM</span></div>
-  <div class="os">✦ hand frame · glass shards ✦</div>
-  <div class="how">
-    <b>SHOT 1</b> — Xoay ngang iPhone<br>
-    Dùng 2 tay tạo khung<br>
-    (ngón cái + ngón trỏ mỗi tay)<br><br>
-    <b>AUTO</b> — Giữ khung 2s → tự chụp ✦<br><br>
-    <b>HOẶC</b> — Chạm 2 ngón cái vào nhau<br>
-    Lặp lại → gương vỡ nhiều mảnh
-  </div>
-  <button class="sbtn" onclick="startApp()">BẮT ĐẦU →</button>
-</div>
-
-<div id="hud">
-  <div class="logo">FOTO<span>✦</span>GRAM</div>
-  <div id="statusText">WAITING</div>
-</div>
-
-<div id="stage">
-  <video id="videoEl" playsinline autoplay muted webkit-playsinline x5-playsinline></video>
+<!-- ══════════════════════════════
+     APP (camera)
+══════════════════════════════ -->
+<div id="app">
+  <video id="videoEl" playsinline autoplay muted webkit-playsinline></video>
   <canvas id="mainCanvas"></canvas>
+
+  <div id="hud">
+    <span class="hud-label">FOTOGRAM</span>
+    <span class="hud-phase" id="phaseLabel">—</span>
+  </div>
+
+  <div id="bottomBar">
+    <button class="cam-btn danger" onclick="resetAll()">↺ Làm lại</button>
+  </div>
 </div>
 
-<div id="autoHint" id="autoHint">AUTO ✦</div>
-
-<div id="bar">
-  <button class="btn" ontouchstart="" onclick="captureManual()">📸 Chụp</button>
-  <button class="btn danger" ontouchstart="" onclick="clearShards()">✕ Xóa</button>
+<!-- ══════════════════════════════
+     SAVE PAGE
+══════════════════════════════ -->
+<div id="savePage">
+  <div class="save-bg"></div>
+  <canvas id="resultCanvas"></canvas>
+  <div class="save-actions">
+    <button class="save-btn" onclick="resetAll()">↺ Chụp lại</button>
+    <button class="save-btn primary" onclick="downloadPhoto()">↓ Lưu ảnh</button>
+  </div>
+  <div class="save-note">Giữ ngón tay → tự chụp sau 3 giây</div>
 </div>
 
-<!-- MediaPipe via CDN -->
+<!-- ══════════════════════════════
+     ERROR
+══════════════════════════════ -->
+<div id="errBox" id="errBox">
+  <h2>CAMERA ERROR</h2>
+  <p id="errMsg"></p>
+  <button class="intro-btn" style="margin-top:8px" onclick="retryCamera()">Thử lại</button>
+</div>
+
+<!-- MediaPipe -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 <script>
-// ── Elements ────────────────────────────────────────────
-const video    = document.getElementById('videoEl');
-const canvas   = document.getElementById('mainCanvas');
-const ctx      = canvas.getContext('2d');
-const statusEl = document.getElementById('statusText');
-const flash    = document.getElementById('flash');
-const autoHint = document.getElementById('autoHint');
-const errBox   = document.getElementById('errBox');
-const errMsg   = document.getElementById('errMsg');
+// ══════════════════════════════════════════════
+//  ELEMENTS
+// ══════════════════════════════════════════════
+const video       = document.getElementById('videoEl');
+const canvas      = document.getElementById('mainCanvas');
+const ctx         = canvas.getContext('2d');
+const resultCvs   = document.getElementById('resultCanvas');
+const rctx        = resultCvs.getContext('2d');
+const flash       = document.getElementById('flash');
+const timerLbl    = document.getElementById('timerLabel');
+const phaseLabel  = document.getElementById('phaseLabel');
 
-// ── Internal resolution (MediaPipe works best at this) ──
-const CAM_W = 640, CAM_H = 480;
-canvas.width  = CAM_W;
-canvas.height = CAM_H;
+// Internal resolution
+const W = 640, H = 480;
+canvas.width  = W; canvas.height = H;
+resultCvs.width = W; resultCvs.height = H;
 
-// ── State ────────────────────────────────────────────────
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+/*
+  PHASES:
+  'shot1' → user creates frame with hands → outside frozen after 3s stable
+  'shot2' → frame still shown → inside captured after 3s stable
+  'save'  → show result
+*/
+let phase          = 'shot1';
 let handsData      = [];
-let shards         = [];
-let pinchCooldown  = 0;
-let lastThumbDist  = 999;
 let animT          = 0;
-let stableFrames   = 0;       // frames the frame has been stable
-let lastFrameRect  = null;    // {x,y,w,h} of last live frame
-const AUTO_FRAMES  = 50;      // ~1.7s at 30fps before auto-capture
-let mediapipeReady = false;
-let mpCamera       = null;
-let mpHands        = null;
 
-const TINTS = [
-  'rgba(150,180,255,.22)','rgba(200,140,255,.18)',
-  'rgba(100,220,255,.16)','rgba(255,210,130,.14)',
-  'rgba(140,255,190,.17)','rgba(255,160,200,.15)',
-  'rgba(180,230,255,.2)' ,'rgba(220,180,255,.16)',
-];
-let tintIdx = 0;
+// Shot1 state
+let frozenBg       = null;   // ImageData of background (outside frame)
+let shot1Done      = false;
 
-// ── Resize canvas to fill screen ─────────────────────────
+// Shot2 state  
+let frozenFace     = null;   // canvas with the face region
+let shot2Done      = false;
+
+// Timer state
+let stableMs       = 0;      // milliseconds frame has been stable
+let lastFrameRect  = null;   // {x,y,w,h}
+let lastFrameTime  = 0;
+const STABLE_DELAY = 3000;   // 3 seconds
+
+// Smoothing buffer for frame rect (reduce jitter)
+const SMOOTH_N = 8;
+let rectBuffer = [];
+
+// ══════════════════════════════════════════════
+//  RESIZE
+// ══════════════════════════════════════════════
 function resizeCanvas() {
   const sw = window.innerWidth, sh = window.innerHeight;
-  const videoAR = CAM_W / CAM_H;
-  const screenAR = sw / sh;
+  const ar = W / H;
+  const sar = sw / sh;
   let dw, dh;
-  if (screenAR > videoAR) { dh = sh; dw = sh * videoAR; }
-  else                     { dw = sw; dh = sw / videoAR; }
+  if (sar > ar) { dh = sh; dw = sh * ar; }
+  else          { dw = sw; dh = sw / ar; }
   canvas.style.width  = dw + 'px';
   canvas.style.height = dh + 'px';
+
+  const rw = Math.min(sw * .9, sh * .9 * ar);
+  resultCvs.style.width  = rw + 'px';
+  resultCvs.style.height = (rw / ar) + 'px';
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
-window.addEventListener('orientationchange', () => { setTimeout(resizeCanvas, 300); });
+window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 300));
 
-// ── Helpers ──────────────────────────────────────────────
+// ══════════════════════════════════════════════
+//  LANDMARK HELPERS
+// ══════════════════════════════════════════════
+// MediaPipe Hands landmark indices
+// 4 = thumb tip, 8 = index finger tip
 function lm(hand, idx) {
-  return { x: hand[idx].x * CAM_W, y: hand[idx].y * CAM_H };
+  // Note: MediaPipe gives x,y normalized 0-1
+  // When we mirror the canvas, we need to also mirror x
+  const raw = hand[idx];
+  return {
+    x: (1 - raw.x) * W,  // mirror X
+    y: raw.y * H
+  };
 }
+
 function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
 
-// ── Capture shard ────────────────────────────────────────
-function captureShard(x1, y1, x2, y2) {
-  const left = Math.min(x1,x2), top = Math.min(y1,y2);
-  const w    = Math.abs(x2-x1), h   = Math.abs(y2-y1);
-  if (w < 24 || h < 24) return;
+// ══════════════════════════════════════════════
+//  GET FRAME RECT FROM 2 HANDS
+// ══════════════════════════════════════════════
+function getFrameRect(hands) {
+  if (hands.length < 2) return null;
 
-  const off  = document.createElement('canvas');
-  off.width = w; off.height = h;
-  const oc = off.getContext('2d');
-  oc.translate(w, 0); oc.scale(-1, 1); // mirror
-  oc.drawImage(video, left, top, w, h, 0, 0, w, h);
+  // Use thumb tip (4) and index tip (8) of each hand
+  // Corner of frame = midpoint between thumb & index of each hand
+  const h0_thumb = lm(hands[0], 4);
+  const h0_index = lm(hands[0], 8);
+  const h1_thumb = lm(hands[1], 4);
+  const h1_index = lm(hands[1], 8);
 
-  shards.push({
-    x: left, y: top, w, h, img: off,
-    tint: TINTS[tintIdx % TINTS.length],
-    dAmp:   2 + Math.random() * 3.5,
-    dSpd:   0.5 + Math.random() * 0.8,
-    dPhs:   Math.random() * Math.PI * 2,
-    rot:    (Math.random() - 0.5) * 0.028,
-  });
-  tintIdx++;
+  const c1 = { x: (h0_thumb.x + h0_index.x) / 2, y: (h0_thumb.y + h0_index.y) / 2 };
+  const c2 = { x: (h1_thumb.x + h1_index.x) / 2, y: (h1_thumb.y + h1_index.y) / 2 };
 
+  return {
+    x: Math.min(c1.x, c2.x),
+    y: Math.min(c1.y, c2.y),
+    w: Math.abs(c2.x - c1.x),
+    h: Math.abs(c2.y - c1.y),
+    c1, c2
+  };
+}
+
+// ══════════════════════════════════════════════
+//  SMOOTH RECT BUFFER
+// ══════════════════════════════════════════════
+function smoothRect(r) {
+  rectBuffer.push(r);
+  if (rectBuffer.length > SMOOTH_N) rectBuffer.shift();
+  const n = rectBuffer.length;
+  return {
+    x: rectBuffer.reduce((s,v)=>s+v.x,0)/n,
+    y: rectBuffer.reduce((s,v)=>s+v.y,0)/n,
+    w: rectBuffer.reduce((s,v)=>s+v.w,0)/n,
+    h: rectBuffer.reduce((s,v)=>s+v.h,0)/n,
+  };
+}
+
+// ══════════════════════════════════════════════
+//  CHECK STABILITY
+// ══════════════════════════════════════════════
+function isStable(rect) {
+  if (!lastFrameRect) return false;
+  const delta = Math.abs(rect.x - lastFrameRect.x)
+              + Math.abs(rect.y - lastFrameRect.y)
+              + Math.abs(rect.w - lastFrameRect.w)
+              + Math.abs(rect.h - lastFrameRect.h);
+  return delta < 20; // pixels total movement threshold
+}
+
+// ══════════════════════════════════════════════
+//  FLASH EFFECT
+// ══════════════════════════════════════════════
+function doFlash() {
   flash.classList.add('go');
-  setTimeout(() => flash.classList.remove('go'), 120);
-  stableFrames = 0; lastFrameRect = null;
-  autoHint.classList.remove('show');
+  setTimeout(() => flash.classList.remove('go'), 130);
 }
 
-function captureManual() {
-  if (handsData.length >= 2) {
-    doCapture(handsData);
-  } else if (handsData.length === 1) {
-    const t = lm(handsData[0],4), i = lm(handsData[0],8);
-    captureShard(t.x, t.y, i.x, i.y);
-  } else {
-    captureShard(160, 90, 480, 390);
-  }
-}
-function clearShards() { shards = []; stableFrames = 0; }
+// ══════════════════════════════════════════════
+//  SHOT 1 CAPTURE — freeze OUTSIDE the frame
+// ══════════════════════════════════════════════
+function captureShot1(rect) {
+  doFlash();
 
-function doCapture(hands) {
-  if (pinchCooldown > 0) return;
-  const c1x = (lm(hands[0],4).x + lm(hands[0],8).x) / 2;
-  const c1y = (lm(hands[0],4).y + lm(hands[0],8).y) / 2;
-  const c2x = (lm(hands[1],4).x + lm(hands[1],8).x) / 2;
-  const c2y = (lm(hands[1],4).y + lm(hands[1],8).y) / 2;
-  captureShard(c1x, c1y, c2x, c2y);
-  pinchCooldown = 40;
+  // Draw full mirrored video to a temp canvas
+  const tmp = document.createElement('canvas');
+  tmp.width = W; tmp.height = H;
+  const tc = tmp.getContext('2d');
+  tc.translate(W, 0); tc.scale(-1, 1);
+  tc.drawImage(video, 0, 0, W, H);
+
+  // Punch a transparent hole where the frame is
+  tc.clearRect(rect.x, rect.y, rect.w, rect.h);
+
+  frozenBg = tmp; // store the canvas (outside only)
+  shot1Done = true;
+  phase = 'shot2';
+  stableMs = 0; lastFrameRect = null; rectBuffer = [];
+  phaseLabel.textContent = 'Giữ khung — shot 2';
 }
 
-// ── Check if frame is stable (for auto-capture) ──────────
-function checkAutoCapture(rect, hands) {
-  if (!lastFrameRect) { lastFrameRect = rect; stableFrames = 0; return; }
-  const moved = Math.abs(rect.x - lastFrameRect.x) + Math.abs(rect.y - lastFrameRect.y)
-              + Math.abs(rect.w - lastFrameRect.w) + Math.abs(rect.h - lastFrameRect.h);
-  lastFrameRect = rect;
-  if (moved < 18) {
-    stableFrames++;
-    // Draw progress arc
-    const prog = stableFrames / AUTO_FRAMES;
-    const cx   = rect.x + rect.w / 2, cy = rect.y + rect.h / 2;
-    const rad  = Math.min(rect.w, rect.h) * 0.08 + 14;
+// ══════════════════════════════════════════════
+//  SHOT 2 CAPTURE — freeze INSIDE the frame
+// ══════════════════════════════════════════════
+function captureShot2(rect) {
+  doFlash();
+
+  // Capture just the face area (inner frame)
+  const tmp = document.createElement('canvas');
+  tmp.width = rect.w; tmp.height = rect.h;
+  const tc = tmp.getContext('2d');
+  tc.translate(rect.w, 0); tc.scale(-1, 1);
+  tc.drawImage(video, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w, rect.h);
+
+  frozenFace = { img: tmp, rect };
+  shot2Done = true;
+
+  // Compose final result
+  composeFinal(rect);
+  showSavePage();
+}
+
+// ══════════════════════════════════════════════
+//  COMPOSE FINAL IMAGE
+// ══════════════════════════════════════════════
+function composeFinal(rect) {
+  // 1. Draw frozen bg (outside frame)
+  rctx.clearRect(0, 0, W, H);
+  rctx.drawImage(frozenBg, 0, 0);
+
+  // 2. Draw frozen face inside frame
+  rctx.drawImage(frozenFace.img, rect.x, rect.y, rect.w, rect.h);
+
+  // 3. Draw glass border on the frame
+  rctx.save();
+  rctx.shadowColor = 'rgba(200,225,255,.9)';
+  rctx.shadowBlur  = 12;
+  rctx.strokeStyle = 'rgba(230,245,255,.85)';
+  rctx.lineWidth   = 1.5;
+  rctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+
+  // Corner dots
+  [[rect.x,rect.y],[rect.x+rect.w,rect.y],[rect.x,rect.y+rect.h],[rect.x+rect.w,rect.y+rect.h]]
+    .forEach(([cx,cy]) => {
+      rctx.beginPath(); rctx.arc(cx, cy, 4, 0, Math.PI*2);
+      rctx.fillStyle = 'rgba(240,210,130,.9)';
+      rctx.shadowColor = 'rgba(240,210,130,.8)';
+      rctx.fill();
+    });
+
+  // Glass tint overlay inside frame
+  rctx.fillStyle = 'rgba(140,170,255,.07)';
+  rctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+  rctx.restore();
+
+  // 4. Subtle vignette
+  const vg = rctx.createRadialGradient(W/2,H/2,H*.3,W/2,H/2,H*.8);
+  vg.addColorStop(0,'transparent');
+  vg.addColorStop(1,'rgba(4,4,12,.45)');
+  rctx.fillStyle = vg;
+  rctx.fillRect(0,0,W,H);
+}
+
+// ══════════════════════════════════════════════
+//  SHOW/HIDE PAGES
+// ══════════════════════════════════════════════
+function showSavePage() {
+  phase = 'save';
+  document.getElementById('savePage').classList.add('active');
+}
+
+function resetAll() {
+  phase      = 'shot1';
+  frozenBg   = null; frozenFace = null;
+  shot1Done  = false; shot2Done  = false;
+  stableMs   = 0; lastFrameRect = null; rectBuffer = [];
+  timerLbl.classList.remove('show');
+  phaseLabel.textContent = 'Tạo khung — shot 1';
+  document.getElementById('savePage').classList.remove('active');
+}
+
+function downloadPhoto() {
+  const a = document.createElement('a');
+  a.download = 'fotogram-' + Date.now() + '.jpg';
+  a.href = resultCvs.toDataURL('image/jpeg', .92);
+  a.click();
+}
+
+// ══════════════════════════════════════════════
+//  DRAW HAND DOTS (debug / visual feedback)
+// ══════════════════════════════════════════════
+function drawHandDots(hands) {
+  hands.forEach(hand => {
+    [4, 8].forEach(idx => {
+      const p = lm(hand, idx);
+      ctx.save();
+      ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI*2);
+      ctx.fillStyle = idx === 4 ? 'rgba(240,210,130,.85)' : 'rgba(180,220,255,.85)';
+      ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 10;
+      ctx.fill(); ctx.restore();
+    });
+
+    // Line between thumb and index
+    const t = lm(hand, 4), i = lm(hand, 8);
     ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, rad, -Math.PI/2, -Math.PI/2 + prog * Math.PI * 2);
-    ctx.strokeStyle = `rgba(240,208,128,${0.5 + prog * 0.4})`;
-    ctx.lineWidth = 2.5; ctx.shadowColor = 'rgba(240,208,128,.8)'; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.moveTo(t.x, t.y); ctx.lineTo(i.x, i.y);
+    ctx.strokeStyle = 'rgba(200,220,255,.25)'; ctx.lineWidth = 1;
     ctx.stroke(); ctx.restore();
-
-    if (stableFrames >= AUTO_FRAMES) {
-      doCapture(hands);
-    }
-  } else {
-    stableFrames = Math.max(0, stableFrames - 3);
-  }
-}
-
-// ── Draw hand frame (Shot 1) ──────────────────────────────
-function drawFrame(hands) {
-  if (!hands.length) return;
-
-  if (hands.length >= 2) {
-    const h0t = lm(hands[0],4), h0i = lm(hands[0],8);
-    const h1t = lm(hands[1],4), h1i = lm(hands[1],8);
-    const c1  = { x:(h0t.x+h0i.x)/2, y:(h0t.y+h0i.y)/2 };
-    const c2  = { x:(h1t.x+h1i.x)/2, y:(h1t.y+h1i.y)/2 };
-    const left= Math.min(c1.x,c2.x), top= Math.min(c1.y,c2.y);
-    const w   = Math.abs(c2.x-c1.x), h  = Math.abs(c2.y-c1.y);
-    const rect = { x:left, y:top, w, h };
-
-    if (w > 20 && h > 20) {
-      // Live preview inside frame
-      ctx.save();
-      ctx.beginPath(); ctx.rect(left,top,w,h); ctx.clip();
-      ctx.translate(CAM_W,0); ctx.scale(-1,1);
-      ctx.drawImage(video,0,0,CAM_W,CAM_H);
-      ctx.restore();
-
-      // Tint
-      ctx.save();
-      ctx.beginPath(); ctx.rect(left,top,w,h); ctx.clip();
-      ctx.fillStyle='rgba(130,170,255,.09)'; ctx.fillRect(left,top,w,h);
-      ctx.restore();
-
-      // Border
-      ctx.save();
-      ctx.shadowColor='rgba(180,220,255,.9)'; ctx.shadowBlur=14;
-      ctx.strokeStyle='rgba(225,242,255,.88)'; ctx.lineWidth=1.5;
-      ctx.strokeRect(left,top,w,h);
-
-      // Corner dots
-      [[left,top],[left+w,top],[left,top+h],[left+w,top+h]].forEach(([cx,cy])=>{
-        ctx.beginPath(); ctx.arc(cx,cy,3.5,0,Math.PI*2);
-        ctx.fillStyle='rgba(240,208,128,.95)';
-        ctx.shadowColor='rgba(240,208,128,.8)'; ctx.fill();
-      });
-      ctx.restore();
-
-      // Auto-capture progress
-      checkAutoCapture(rect, hands);
-    }
-
-    // Thumb-to-thumb pinch → capture
-    const td = dist(h0t, h1t);
-    if (td < 40 && lastThumbDist >= 40) doCapture(hands);
-    lastThumbDist = td;
-
-    // Proximity ring
-    const prox = Math.max(0, 1 - td/80);
-    if (prox > 0.05) {
-      const mx=(h0t.x+h1t.x)/2, my=(h0t.y+h1t.y)/2;
-      ctx.save();
-      ctx.beginPath(); ctx.arc(mx,my,18*prox,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(240,208,128,${prox*.9})`;
-      ctx.lineWidth=2; ctx.shadowColor='rgba(240,208,128,.8)'; ctx.shadowBlur=10;
-      ctx.stroke(); ctx.restore();
-    }
-
-    const sec = ((AUTO_FRAMES - stableFrames) / 30).toFixed(1);
-    statusEl.textContent = td < 40 ? '✦ CHỤP!' : stableFrames > 5 ? `AUTO ${sec}s` : '2 TAY ✦';
-
-  } else {
-    // 1 hand hint
-    stableFrames = 0; lastFrameRect = null;
-    const t=lm(hands[0],4), i=lm(hands[0],8);
-    const left=Math.min(t.x,i.x),top=Math.min(t.y,i.y);
-    const w=Math.abs(i.x-t.x), h=Math.abs(i.y-t.y);
-    if(w>8&&h>8){
-      ctx.save();
-      ctx.setLineDash([5,4]); ctx.strokeStyle='rgba(180,210,255,.35)';
-      ctx.lineWidth=1; ctx.strokeRect(left,top,w,h); ctx.restore();
-    }
-    statusEl.textContent = 'THÊM TAY KIA →';
-  }
-}
-
-// ── Draw frozen shards ────────────────────────────────────
-function drawShards() {
-  shards.forEach((s, i) => {
-    const dx = Math.sin(animT*s.dSpd + s.dPhs) * s.dAmp;
-    const dy = Math.cos(animT*s.dSpd*.7 + s.dPhs) * s.dAmp*.6;
-    const r  = Math.sin(animT*.28 + i) * s.rot;
-    ctx.save();
-    ctx.translate(s.x + s.w/2 + dx, s.y + s.h/2 + dy);
-    ctx.rotate(r);
-    ctx.drawImage(s.img, -s.w/2, -s.h/2, s.w, s.h);
-    ctx.fillStyle = s.tint; ctx.fillRect(-s.w/2,-s.h/2,s.w,s.h);
-
-    // Glint
-    const gp = (animT*.45 + i*.8) % (Math.PI*2);
-    const go = Math.max(0, Math.sin(gp)) * .32;
-    if (go > .04) {
-      const gl = ctx.createLinearGradient(-s.w/2,-s.h/2,s.w/2,s.h/2);
-      gl.addColorStop(0,'transparent');
-      gl.addColorStop(.45,`rgba(255,255,255,${go})`);
-      gl.addColorStop(.55,`rgba(255,255,255,${go*.35})`);
-      gl.addColorStop(1,'transparent');
-      ctx.fillStyle=gl; ctx.fillRect(-s.w/2,-s.h/2,s.w,s.h);
-    }
-    ctx.shadowColor='rgba(180,220,255,.6)'; ctx.shadowBlur=7;
-    ctx.strokeStyle='rgba(220,240,255,.58)'; ctx.lineWidth=.8;
-    ctx.strokeRect(-s.w/2,-s.h/2,s.w,s.h);
-    ctx.restore();
   });
 }
 
-// ── Render ────────────────────────────────────────────────
-function render(results) {
-  animT += .018;
-  if (pinchCooldown > 0) pinchCooldown--;
-
-  ctx.clearRect(0,0,CAM_W,CAM_H);
-
-  // Base video mirrored
+// ══════════════════════════════════════════════
+//  DRAW FRAME
+// ══════════════════════════════════════════════
+function drawFrameRect(rect, progress) {
+  // Clip preview inside frame
   ctx.save();
-  ctx.translate(CAM_W,0); ctx.scale(-1,1);
-  ctx.drawImage(video,0,0,CAM_W,CAM_H);
+  ctx.beginPath(); ctx.rect(rect.x, rect.y, rect.w, rect.h); ctx.clip();
+  ctx.translate(W, 0); ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0, W, H);
   ctx.restore();
 
-  // Dark vignette
-  ctx.fillStyle='rgba(6,6,14,.4)'; ctx.fillRect(0,0,CAM_W,CAM_H);
+  // Glass tint
+  ctx.save();
+  ctx.beginPath(); ctx.rect(rect.x, rect.y, rect.w, rect.h); ctx.clip();
+  ctx.fillStyle = 'rgba(120,160,255,.08)'; ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+  ctx.restore();
 
-  drawShards();
+  // Border
+  ctx.save();
+  ctx.shadowColor = 'rgba(180,220,255,.9)'; ctx.shadowBlur = 14;
+  ctx.strokeStyle = `rgba(225,242,255,${.5 + progress * .4})`;
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
 
-  if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-    handsData = results.multiHandLandmarks;
-    drawFrame(handsData);
-  } else {
-    handsData = []; stableFrames = 0; lastFrameRect = null;
-    const sc = shards.length;
-    statusEl.textContent = sc > 0 ? `${sc} SHARD${sc>1?'S':''} ✦` : 'CHUẨN BỊ TAY...';
-    const sy = ((Date.now()/12) % CAM_H);
-    ctx.strokeStyle='rgba(180,210,255,.06)'; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(0,sy); ctx.lineTo(CAM_W,sy); ctx.stroke();
-  }
+  // Corner dots
+  [[rect.x,rect.y],[rect.x+rect.w,rect.y],[rect.x,rect.y+rect.h],[rect.x+rect.w,rect.y+rect.h]]
+    .forEach(([cx,cy]) => {
+      ctx.beginPath(); ctx.arc(cx, cy, 3.5, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(240,210,130,.9)'; ctx.shadowColor = 'rgba(240,210,130,.8)';
+      ctx.fill();
+    });
+  ctx.restore();
 
-  if (shards.length > 0) {
-    ctx.font='9px Space Mono,monospace';
-    ctx.fillStyle='rgba(240,208,128,.28)';
-    ctx.fillText(`${shards.length} SHARDS`, 9, CAM_H-9);
+  // Progress arc (timer ring) around frame center
+  if (progress > 0) {
+    const cx = rect.x + rect.w / 2, cy = rect.y + rect.h / 2;
+    const rad = Math.min(rect.w, rect.h) * 0.48;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, rad, -Math.PI/2, -Math.PI/2 + progress * Math.PI * 2);
+    ctx.strokeStyle = `rgba(240,210,130,${.4 + progress * .5})`;
+    ctx.lineWidth = 2; ctx.shadowColor = 'rgba(240,210,130,.7)'; ctx.shadowBlur = 12;
+    ctx.stroke(); ctx.restore();
   }
 }
 
-// ── Camera start (iOS-safe) ───────────────────────────────
-async function startCamera() {
-  // iOS Safari needs exact constraints + must be called from user gesture
-  const constraints = {
-    video: {
-      facingMode: 'user',
-      width:  { ideal: 640 },
-      height: { ideal: 480 },
-    },
-    audio: false
-  };
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    video.srcObject = stream;
-    // iOS needs explicit play() after srcObject assignment
-    video.setAttribute('playsinline','');
-    await video.play();
-    return true;
-  } catch(e) {
-    // Fallback: try without width/height constraints (some old iPhones)
-    try {
-      const stream2 = await navigator.mediaDevices.getUserMedia({ video: { facingMode:'user' }, audio:false });
-      video.srcObject = stream2;
-      video.setAttribute('playsinline','');
-      await video.play();
-      return true;
-    } catch(e2) {
-      throw e2;
+// ══════════════════════════════════════════════
+//  MAIN RENDER
+// ══════════════════════════════════════════════
+function render(results) {
+  animT += .018;
+  const now = Date.now();
+
+  ctx.clearRect(0, 0, W, H);
+
+  if (phase === 'save') return;
+
+  // ── Draw base video ──
+  if (phase === 'shot1') {
+    // Normal mirrored video
+    ctx.save();
+    ctx.translate(W, 0); ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0, W, H);
+    ctx.restore();
+    ctx.fillStyle = 'rgba(5,5,14,.3)'; ctx.fillRect(0,0,W,H);
+
+  } else if (phase === 'shot2') {
+    // Draw frozen background (outside)
+    if (frozenBg) ctx.drawImage(frozenBg, 0, 0);
+    // Live video only inside frame (drawn in drawFrameRect)
+  }
+
+  // ── Get hands ──
+  handsData = (results.multiHandLandmarks && results.multiHandLandmarks.length > 0)
+    ? results.multiHandLandmarks : [];
+
+  if (handsData.length >= 2) {
+    const rawRect = getFrameRect(handsData);
+    if (!rawRect || rawRect.w < 30 || rawRect.h < 30) {
+      stableMs = 0; lastFrameRect = null;
+      drawHandDots(handsData);
+      return;
     }
+
+    const rect = smoothRect(rawRect);
+
+    // Check stability
+    const stable = isStable(rect);
+    if (stable) {
+      stableMs += (now - lastFrameTime);
+    } else {
+      stableMs = 0;
+    }
+    lastFrameRect = rect;
+    lastFrameTime = now;
+
+    const progress = Math.min(stableMs / STABLE_DELAY, 1);
+
+    // Draw the frame
+    drawFrameRect(rect, progress);
+
+    // Draw hand dots
+    drawHandDots(handsData);
+
+    // Timer label (countdown)
+    if (stableMs > 300) {
+      const remaining = Math.ceil((STABLE_DELAY - stableMs) / 1000);
+      timerLbl.textContent = remaining > 0 ? remaining : '✦';
+      timerLbl.classList.add('show');
+    } else {
+      timerLbl.classList.remove('show');
+    }
+
+    // Auto capture at 100%
+    if (progress >= 1) {
+      timerLbl.classList.remove('show');
+      stableMs = 0; lastFrameRect = null; rectBuffer = [];
+      if (phase === 'shot1') captureShot1(rect);
+      else if (phase === 'shot2') captureShot2(rect);
+    }
+
+  } else {
+    // No 2 hands
+    stableMs = 0; lastFrameRect = null;
+    timerLbl.classList.remove('show');
+
+    if (handsData.length === 1) {
+      drawHandDots(handsData);
+      // Show 1-hand dashed hint
+      const t = lm(handsData[0], 4), i = lm(handsData[0], 8);
+      ctx.save();
+      ctx.setLineDash([5,5]); ctx.strokeStyle = 'rgba(180,210,255,.3)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(Math.min(t.x,i.x), Math.min(t.y,i.y), Math.abs(i.x-t.x), Math.abs(i.y-t.y));
+      ctx.restore();
+    }
+
+    // Idle scan line
+    const sy = ((now / 14) % H);
+    ctx.strokeStyle = 'rgba(160,190,255,.06)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0,sy); ctx.lineTo(W,sy); ctx.stroke();
+
+    // Phase hint text on canvas
+    const msg = phase === 'shot1' ? 'Đưa 2 tay vào — tạo khung' : 'Đưa tay vào lại — chụp mặt';
+    ctx.font = '500 13px Cormorant Garamond, serif';
+    ctx.fillStyle = 'rgba(180,200,255,.35)';
+    ctx.textAlign = 'center';
+    ctx.fillText(msg, W/2, H - 18);
+    ctx.textAlign = 'left';
   }
+
+  // Phase label update
+  if (phase === 'shot1') phaseLabel.textContent = handsData.length >= 2 ? 'Giữ yên → 3s' : 'Shot 1 — tạo khung';
+  else if (phase === 'shot2') phaseLabel.textContent = handsData.length >= 2 ? 'Giữ yên → 3s' : 'Shot 2 — chụp mặt';
 }
 
+// ══════════════════════════════════════════════
+//  START
+// ══════════════════════════════════════════════
 async function retryCamera() {
-  errBox.classList.remove('show');
+  document.getElementById('errBox').classList.remove('show');
   await initMediaPipe();
 }
 
 async function initMediaPipe() {
-  statusEl.textContent = 'LOADING...';
+  phaseLabel.textContent = 'Loading...';
   try {
-    await startCamera();
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode:'user', width:{ideal:640}, height:{ideal:480} },
+      audio: false
+    }).catch(() => navigator.mediaDevices.getUserMedia({ video:{facingMode:'user'}, audio:false }));
+
+    video.srcObject = stream;
+    video.setAttribute('playsinline','');
+    await video.play();
   } catch(e) {
-    errBox.classList.add('show');
-    errMsg.innerHTML =
-      `<b>${e.name}</b><br>${e.message}<br><br>` +
-      `• Mở bằng <b>Safari</b> trên iPhone<br>` +
-      `• Vào Settings → Safari → Camera → Allow<br>` +
-      `• Trang web cần <b>HTTPS</b> hoặc localhost`;
+    document.getElementById('errBox').classList.add('show');
+    document.getElementById('errMsg').innerHTML =
+      `${e.name}: ${e.message}<br><br>• Mở bằng Safari trên iPhone<br>• Cần HTTPS hoặc localhost<br>• Cho phép quyền Camera`;
     return;
   }
 
-  try {
-    mpHands = new Hands({
-      locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
-    });
-    mpHands.setOptions({
-      maxNumHands: 2,
-      modelComplexity: 1,
-      minDetectionConfidence: .7,
-      minTrackingConfidence: .6,
-    });
-    mpHands.onResults(render);
+  const hands = new Hands({
+    locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
+  });
+  hands.setOptions({
+    maxNumHands: 2,
+    modelComplexity: 1,
+    minDetectionConfidence: .75,
+    minTrackingConfidence: .7,
+  });
+  hands.onResults(render);
 
-    mpCamera = new Camera(video, {
-      onFrame: async () => { await mpHands.send({ image: video }); },
-      width: CAM_W, height: CAM_H,
-    });
-    await mpCamera.start();
-    statusEl.textContent = 'CHUẨN BỊ TAY...';
-  } catch(e) {
-    errBox.classList.add('show');
-    errMsg.innerHTML = `MediaPipe error:<br>${e.message}<br><br>Thử dùng Chrome hoặc Safari mới nhất`;
-  }
+  const cam = new Camera(video, {
+    onFrame: async () => { await hands.send({ image: video }); },
+    width: W, height: H
+  });
+  await cam.start();
+
+  phaseLabel.textContent = 'Shot 1 — tạo khung';
 }
 
-async function startApp() {
-  document.getElementById('overlay').classList.add('hidden');
-  await initMediaPipe();
+function startApp() {
+  document.getElementById('intro').classList.add('out');
+  document.getElementById('app').classList.add('active');
+  initMediaPipe();
 }
 
-// ── Prevent scroll / zoom on mobile ──────────────────────
 document.addEventListener('touchmove', e => e.preventDefault(), { passive:false });
 document.addEventListener('gesturestart', e => e.preventDefault());
 </script>
