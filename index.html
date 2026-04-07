@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>FOTOGRAM ✦</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono&family=Bebas+Neue&display=swap');
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{--bg:#06060e;--accent:#b8d4ff;--gold:#f0d080}
+  html,body{width:100%;height:100%;overflow:hidden;touch-action:none}
+  body{
+    background:var(--bg);color:var(--accent);
+    font-family:'Space Mono',monospace;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+  }
+
+  /* ── Stage ── */
+  #stage{
+    position:relative;
+    width:100vw;height:100vh;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+  }
+  #videoEl{
+    position:absolute;opacity:0;pointer-events:none;
+    /* will be sized dynamically */
+  }
+  #mainCanvas{
+    display:block;
+    /* sized by JS to fill screen letterboxed */
+    max-width:100vw;max-height:100vh;
+    touch-action:none;
+  }
+
+  /* ── Header ── */
+  #hud{
+    position:fixed;top:0;left:0;right:0;
+    padding:max(env(safe-area-inset-top),12px) 18px 10px;
+    display:flex;justify-content:space-between;align-items:center;
+    z-index:50;pointer-events:none;
+  }
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.2em;color:var(--accent)}
+  .logo span{color:var(--gold)}
+  #statusText{font-size:.5rem;letter-spacing:.18em;text-transform:uppercase;opacity:.55}
+
+  /* ── Bottom bar ── */
+  #bar{
+    position:fixed;bottom:0;left:0;right:0;
+    padding:10px 16px max(env(safe-area-inset-bottom),14px);
+    display:flex;justify-content:center;align-items:center;gap:10px;
+    z-index:50;
+  }
+  .btn{
+    background:rgba(180,210,255,.06);
+    border:1px solid rgba(180,210,255,.22);
+    color:var(--accent);font-family:'Space Mono',monospace;
+    font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;
+    padding:9px 16px;cursor:pointer;border-radius:2px;
+    transition:background .2s,border-color .2s;
+    -webkit-appearance:none;
+  }
+  .btn:active{background:rgba(180,210,255,.18)}
+  .btn.danger{border-color:rgba(255,100,100,.3);color:rgba(255,150,150,.85)}
+  .btn.danger:active{background:rgba(255,60,60,.12)}
+
+  /* ── Auto-capture ring (shown on canvas, but CSS hint) ── */
+  #autoHint{
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+    font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;
+    opacity:0;transition:opacity .3s;pointer-events:none;z-index:60;
+    color:var(--gold);text-align:center;
+  }
+  #autoHint.show{opacity:.7}
+
+  /* ── Overlay ── */
+  #overlay{
+    position:fixed;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    background:var(--bg);z-index:200;gap:12px;transition:opacity .4s;
+  }
+  #overlay.hidden{opacity:0;pointer-events:none}
+  .ot{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(2.8rem,12vw,5.5rem);
+    letter-spacing:.1em;color:var(--accent);text-align:center;line-height:.92;
+  }
+  .ot span{color:var(--gold)}
+  .os{font-size:.55rem;letter-spacing:.28em;text-transform:uppercase;opacity:.4}
+  .how{
+    margin-top:4px;background:rgba(180,210,255,.04);
+    border:1px solid rgba(180,210,255,.13);border-radius:3px;
+    padding:13px 20px;font-size:.55rem;line-height:2.1;
+    letter-spacing:.03em;opacity:.75;max-width:290px;
+  }
+  .how b{color:var(--gold)}
+  .sbtn{
+    margin-top:8px;background:transparent;
+    border:1px solid rgba(180,210,255,.4);color:var(--accent);
+    font-family:'Space Mono',monospace;font-size:.62rem;
+    letter-spacing:.2em;text-transform:uppercase;
+    padding:12px 30px;cursor:pointer;border-radius:2px;
+    animation:pulse 2.4s ease-in-out infinite;-webkit-appearance:none;
+  }
+  @keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+
+  /* ── Flash ── */
+  #flash{
+    position:fixed;inset:0;background:#fff;opacity:0;
+    pointer-events:none;z-index:300;transition:opacity .06s;
+  }
+  #flash.go{opacity:.6}
+
+  /* ── Error box ── */
+  #errBox{
+    display:none;position:fixed;inset:0;
+    align-items:center;justify-content:center;
+    background:var(--bg);z-index:400;flex-direction:column;gap:14px;padding:30px;
+    text-align:center;
+  }
+  #errBox.show{display:flex}
+  #errMsg{font-size:.6rem;line-height:1.8;opacity:.7;max-width:300px}
+  #errTitle{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#ff8080;letter-spacing:.1em}
+
+  /* Corners */
+  .c{position:fixed;width:28px;height:28px;border-color:rgba(180,210,255,.15);border-style:solid;z-index:60}
+  .c.tl{top:8px;left:8px;border-width:1px 0 0 1px}
+  .c.tr{top:8px;right:8px;border-width:1px 1px 0 0}
+  .c.bl{bottom:8px;left:8px;border-width:0 0 1px 1px}
+  .c.br{bottom:8px;right:8px;border-width:0 1px 1px 0}
+</style>
+</head>
+<body>
+<div class="c tl"></div><div class="c tr"></div>
+<div class="c bl"></div><div class="c br"></div>
+<div id="flash"></div>
+
+<!-- Error box -->
+<div id="errBox">
+  <div id="errTitle">CAMERA ERROR</div>
+  <div id="errMsg"></div>
+  <button class="sbtn" onclick="retryCamera()">↺ Thử lại</button>
+  <div style="font-size:.5rem;opacity:.35;margin-top:4px">
+    iOS: Cài từ Safari · Cho phép Camera trong Settings
+  </div>
+</div>
+
+<!-- Overlay intro -->
+<div id="overlay">
+  <div class="ot">FOTO<br><span>GRAM</span></div>
+  <div class="os">✦ hand frame · glass shards ✦</div>
+  <div class="how">
+    <b>SHOT 1</b> — Xoay ngang iPhone<br>
+    Dùng 2 tay tạo khung<br>
+    (ngón cái + ngón trỏ mỗi tay)<br><br>
+    <b>AUTO</b> — Giữ khung 2s → tự chụp ✦<br><br>
+    <b>HOẶC</b> — Chạm 2 ngón cái vào nhau<br>
+    Lặp lại → gương vỡ nhiều mảnh
+  </div>
+  <button class="sbtn" onclick="startApp()">BẮT ĐẦU →</button>
+</div>
+
+<div id="hud">
+  <div class="logo">FOTO<span>✦</span>GRAM</div>
+  <div id="statusText">WAITING</div>
+</div>
+
+<div id="stage">
+  <video id="videoEl" playsinline autoplay muted webkit-playsinline x5-playsinline></video>
+  <canvas id="mainCanvas"></canvas>
+</div>
+
+<div id="autoHint" id="autoHint">AUTO ✦</div>
+
+<div id="bar">
+  <button class="btn" ontouchstart="" onclick="captureManual()">📸 Chụp</button>
+  <button class="btn danger" ontouchstart="" onclick="clearShards()">✕ Xóa</button>
+</div>
+
+<!-- MediaPipe via CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<script>
+// ── Elements ────────────────────────────────────────────
+const video    = document.getElementById('videoEl');
+const canvas   = document.getElementById('mainCanvas');
+const ctx      = canvas.getContext('2d');
+const statusEl = document.getElementById('statusText');
+const flash    = document.getElementById('flash');
+const autoHint = document.getElementById('autoHint');
+const errBox   = document.getElementById('errBox');
+const errMsg   = document.getElementById('errMsg');
+
+// ── Internal resolution (MediaPipe works best at this) ──
+const CAM_W = 640, CAM_H = 480;
+canvas.width  = CAM_W;
+canvas.height = CAM_H;
+
+// ── State ────────────────────────────────────────────────
+let handsData      = [];
+let shards         = [];
+let pinchCooldown  = 0;
+let lastThumbDist  = 999;
+let animT          = 0;
+let stableFrames   = 0;       // frames the frame has been stable
+let lastFrameRect  = null;    // {x,y,w,h} of last live frame
+const AUTO_FRAMES  = 50;      // ~1.7s at 30fps before auto-capture
+let mediapipeReady = false;
+let mpCamera       = null;
+let mpHands        = null;
+
+const TINTS = [
+  'rgba(150,180,255,.22)','rgba(200,140,255,.18)',
+  'rgba(100,220,255,.16)','rgba(255,210,130,.14)',
+  'rgba(140,255,190,.17)','rgba(255,160,200,.15)',
+  'rgba(180,230,255,.2)' ,'rgba(220,180,255,.16)',
+];
+let tintIdx = 0;
+
+// ── Resize canvas to fill screen ─────────────────────────
+function resizeCanvas() {
+  const sw = window.innerWidth, sh = window.innerHeight;
+  const videoAR = CAM_W / CAM_H;
+  const screenAR = sw / sh;
+  let dw, dh;
+  if (screenAR > videoAR) { dh = sh; dw = sh * videoAR; }
+  else                     { dw = sw; dh = sw / videoAR; }
+  canvas.style.width  = dw + 'px';
+  canvas.style.height = dh + 'px';
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('orientationchange', () => { setTimeout(resizeCanvas, 300); });
+
+// ── Helpers ──────────────────────────────────────────────
+function lm(hand, idx) {
+  return { x: hand[idx].x * CAM_W, y: hand[idx].y * CAM_H };
+}
+function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+
+// ── Capture shard ────────────────────────────────────────
+function captureShard(x1, y1, x2, y2) {
+  const left = Math.min(x1,x2), top = Math.min(y1,y2);
+  const w    = Math.abs(x2-x1), h   = Math.abs(y2-y1);
+  if (w < 24 || h < 24) return;
+
+  const off  = document.createElement('canvas');
+  off.width = w; off.height = h;
+  const oc = off.getContext('2d');
+  oc.translate(w, 0); oc.scale(-1, 1); // mirror
+  oc.drawImage(video, left, top, w, h, 0, 0, w, h);
+
+  shards.push({
+    x: left, y: top, w, h, img: off,
+    tint: TINTS[tintIdx % TINTS.length],
+    dAmp:   2 + Math.random() * 3.5,
+    dSpd:   0.5 + Math.random() * 0.8,
+    dPhs:   Math.random() * Math.PI * 2,
+    rot:    (Math.random() - 0.5) * 0.028,
+  });
+  tintIdx++;
+
+  flash.classList.add('go');
+  setTimeout(() => flash.classList.remove('go'), 120);
+  stableFrames = 0; lastFrameRect = null;
+  autoHint.classList.remove('show');
+}
+
+function captureManual() {
+  if (handsData.length >= 2) {
+    doCapture(handsData);
+  } else if (handsData.length === 1) {
+    const t = lm(handsData[0],4), i = lm(handsData[0],8);
+    captureShard(t.x, t.y, i.x, i.y);
+  } else {
+    captureShard(160, 90, 480, 390);
+  }
+}
+function clearShards() { shards = []; stableFrames = 0; }
+
+function doCapture(hands) {
+  if (pinchCooldown > 0) return;
+  const c1x = (lm(hands[0],4).x + lm(hands[0],8).x) / 2;
+  const c1y = (lm(hands[0],4).y + lm(hands[0],8).y) / 2;
+  const c2x = (lm(hands[1],4).x + lm(hands[1],8).x) / 2;
+  const c2y = (lm(hands[1],4).y + lm(hands[1],8).y) / 2;
+  captureShard(c1x, c1y, c2x, c2y);
+  pinchCooldown = 40;
+}
+
+// ── Check if frame is stable (for auto-capture) ──────────
+function checkAutoCapture(rect, hands) {
+  if (!lastFrameRect) { lastFrameRect = rect; stableFrames = 0; return; }
+  const moved = Math.abs(rect.x - lastFrameRect.x) + Math.abs(rect.y - lastFrameRect.y)
+              + Math.abs(rect.w - lastFrameRect.w) + Math.abs(rect.h - lastFrameRect.h);
+  lastFrameRect = rect;
+  if (moved < 18) {
+    stableFrames++;
+    // Draw progress arc
+    const prog = stableFrames / AUTO_FRAMES;
+    const cx   = rect.x + rect.w / 2, cy = rect.y + rect.h / 2;
+    const rad  = Math.min(rect.w, rect.h) * 0.08 + 14;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, rad, -Math.PI/2, -Math.PI/2 + prog * Math.PI * 2);
+    ctx.strokeStyle = `rgba(240,208,128,${0.5 + prog * 0.4})`;
+    ctx.lineWidth = 2.5; ctx.shadowColor = 'rgba(240,208,128,.8)'; ctx.shadowBlur = 8;
+    ctx.stroke(); ctx.restore();
+
+    if (stableFrames >= AUTO_FRAMES) {
+      doCapture(hands);
+    }
+  } else {
+    stableFrames = Math.max(0, stableFrames - 3);
+  }
+}
+
+// ── Draw hand frame (Shot 1) ──────────────────────────────
+function drawFrame(hands) {
+  if (!hands.length) return;
+
+  if (hands.length >= 2) {
+    const h0t = lm(hands[0],4), h0i = lm(hands[0],8);
+    const h1t = lm(hands[1],4), h1i = lm(hands[1],8);
+    const c1  = { x:(h0t.x+h0i.x)/2, y:(h0t.y+h0i.y)/2 };
+    const c2  = { x:(h1t.x+h1i.x)/2, y:(h1t.y+h1i.y)/2 };
+    const left= Math.min(c1.x,c2.x), top= Math.min(c1.y,c2.y);
+    const w   = Math.abs(c2.x-c1.x), h  = Math.abs(c2.y-c1.y);
+    const rect = { x:left, y:top, w, h };
+
+    if (w > 20 && h > 20) {
+      // Live preview inside frame
+      ctx.save();
+      ctx.beginPath(); ctx.rect(left,top,w,h); ctx.clip();
+      ctx.translate(CAM_W,0); ctx.scale(-1,1);
+      ctx.drawImage(video,0,0,CAM_W,CAM_H);
+      ctx.restore();
+
+      // Tint
+      ctx.save();
+      ctx.beginPath(); ctx.rect(left,top,w,h); ctx.clip();
+      ctx.fillStyle='rgba(130,170,255,.09)'; ctx.fillRect(left,top,w,h);
+      ctx.restore();
+
+      // Border
+      ctx.save();
+      ctx.shadowColor='rgba(180,220,255,.9)'; ctx.shadowBlur=14;
+      ctx.strokeStyle='rgba(225,242,255,.88)'; ctx.lineWidth=1.5;
+      ctx.strokeRect(left,top,w,h);
+
+      // Corner dots
+      [[left,top],[left+w,top],[left,top+h],[left+w,top+h]].forEach(([cx,cy])=>{
+        ctx.beginPath(); ctx.arc(cx,cy,3.5,0,Math.PI*2);
+        ctx.fillStyle='rgba(240,208,128,.95)';
+        ctx.shadowColor='rgba(240,208,128,.8)'; ctx.fill();
+      });
+      ctx.restore();
+
+      // Auto-capture progress
+      checkAutoCapture(rect, hands);
+    }
+
+    // Thumb-to-thumb pinch → capture
+    const td = dist(h0t, h1t);
+    if (td < 40 && lastThumbDist >= 40) doCapture(hands);
+    lastThumbDist = td;
+
+    // Proximity ring
+    const prox = Math.max(0, 1 - td/80);
+    if (prox > 0.05) {
+      const mx=(h0t.x+h1t.x)/2, my=(h0t.y+h1t.y)/2;
+      ctx.save();
+      ctx.beginPath(); ctx.arc(mx,my,18*prox,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(240,208,128,${prox*.9})`;
+      ctx.lineWidth=2; ctx.shadowColor='rgba(240,208,128,.8)'; ctx.shadowBlur=10;
+      ctx.stroke(); ctx.restore();
+    }
+
+    const sec = ((AUTO_FRAMES - stableFrames) / 30).toFixed(1);
+    statusEl.textContent = td < 40 ? '✦ CHỤP!' : stableFrames > 5 ? `AUTO ${sec}s` : '2 TAY ✦';
+
+  } else {
+    // 1 hand hint
+    stableFrames = 0; lastFrameRect = null;
+    const t=lm(hands[0],4), i=lm(hands[0],8);
+    const left=Math.min(t.x,i.x),top=Math.min(t.y,i.y);
+    const w=Math.abs(i.x-t.x), h=Math.abs(i.y-t.y);
+    if(w>8&&h>8){
+      ctx.save();
+      ctx.setLineDash([5,4]); ctx.strokeStyle='rgba(180,210,255,.35)';
+      ctx.lineWidth=1; ctx.strokeRect(left,top,w,h); ctx.restore();
+    }
+    statusEl.textContent = 'THÊM TAY KIA →';
+  }
+}
+
+// ── Draw frozen shards ────────────────────────────────────
+function drawShards() {
+  shards.forEach((s, i) => {
+    const dx = Math.sin(animT*s.dSpd + s.dPhs) * s.dAmp;
+    const dy = Math.cos(animT*s.dSpd*.7 + s.dPhs) * s.dAmp*.6;
+    const r  = Math.sin(animT*.28 + i) * s.rot;
+    ctx.save();
+    ctx.translate(s.x + s.w/2 + dx, s.y + s.h/2 + dy);
+    ctx.rotate(r);
+    ctx.drawImage(s.img, -s.w/2, -s.h/2, s.w, s.h);
+    ctx.fillStyle = s.tint; ctx.fillRect(-s.w/2,-s.h/2,s.w,s.h);
+
+    // Glint
+    const gp = (animT*.45 + i*.8) % (Math.PI*2);
+    const go = Math.max(0, Math.sin(gp)) * .32;
+    if (go > .04) {
+      const gl = ctx.createLinearGradient(-s.w/2,-s.h/2,s.w/2,s.h/2);
+      gl.addColorStop(0,'transparent');
+      gl.addColorStop(.45,`rgba(255,255,255,${go})`);
+      gl.addColorStop(.55,`rgba(255,255,255,${go*.35})`);
+      gl.addColorStop(1,'transparent');
+      ctx.fillStyle=gl; ctx.fillRect(-s.w/2,-s.h/2,s.w,s.h);
+    }
+    ctx.shadowColor='rgba(180,220,255,.6)'; ctx.shadowBlur=7;
+    ctx.strokeStyle='rgba(220,240,255,.58)'; ctx.lineWidth=.8;
+    ctx.strokeRect(-s.w/2,-s.h/2,s.w,s.h);
+    ctx.restore();
+  });
+}
+
+// ── Render ────────────────────────────────────────────────
+function render(results) {
+  animT += .018;
+  if (pinchCooldown > 0) pinchCooldown--;
+
+  ctx.clearRect(0,0,CAM_W,CAM_H);
+
+  // Base video mirrored
+  ctx.save();
+  ctx.translate(CAM_W,0); ctx.scale(-1,1);
+  ctx.drawImage(video,0,0,CAM_W,CAM_H);
+  ctx.restore();
+
+  // Dark vignette
+  ctx.fillStyle='rgba(6,6,14,.4)'; ctx.fillRect(0,0,CAM_W,CAM_H);
+
+  drawShards();
+
+  if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+    handsData = results.multiHandLandmarks;
+    drawFrame(handsData);
+  } else {
+    handsData = []; stableFrames = 0; lastFrameRect = null;
+    const sc = shards.length;
+    statusEl.textContent = sc > 0 ? `${sc} SHARD${sc>1?'S':''} ✦` : 'CHUẨN BỊ TAY...';
+    const sy = ((Date.now()/12) % CAM_H);
+    ctx.strokeStyle='rgba(180,210,255,.06)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,sy); ctx.lineTo(CAM_W,sy); ctx.stroke();
+  }
+
+  if (shards.length > 0) {
+    ctx.font='9px Space Mono,monospace';
+    ctx.fillStyle='rgba(240,208,128,.28)';
+    ctx.fillText(`${shards.length} SHARDS`, 9, CAM_H-9);
+  }
+}
+
+// ── Camera start (iOS-safe) ───────────────────────────────
+async function startCamera() {
+  // iOS Safari needs exact constraints + must be called from user gesture
+  const constraints = {
+    video: {
+      facingMode: 'user',
+      width:  { ideal: 640 },
+      height: { ideal: 480 },
+    },
+    audio: false
+  };
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = stream;
+    // iOS needs explicit play() after srcObject assignment
+    video.setAttribute('playsinline','');
+    await video.play();
+    return true;
+  } catch(e) {
+    // Fallback: try without width/height constraints (some old iPhones)
+    try {
+      const stream2 = await navigator.mediaDevices.getUserMedia({ video: { facingMode:'user' }, audio:false });
+      video.srcObject = stream2;
+      video.setAttribute('playsinline','');
+      await video.play();
+      return true;
+    } catch(e2) {
+      throw e2;
+    }
+  }
+}
+
+async function retryCamera() {
+  errBox.classList.remove('show');
+  await initMediaPipe();
+}
+
+async function initMediaPipe() {
+  statusEl.textContent = 'LOADING...';
+  try {
+    await startCamera();
+  } catch(e) {
+    errBox.classList.add('show');
+    errMsg.innerHTML =
+      `<b>${e.name}</b><br>${e.message}<br><br>` +
+      `• Mở bằng <b>Safari</b> trên iPhone<br>` +
+      `• Vào Settings → Safari → Camera → Allow<br>` +
+      `• Trang web cần <b>HTTPS</b> hoặc localhost`;
+    return;
+  }
+
+  try {
+    mpHands = new Hands({
+      locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
+    });
+    mpHands.setOptions({
+      maxNumHands: 2,
+      modelComplexity: 1,
+      minDetectionConfidence: .7,
+      minTrackingConfidence: .6,
+    });
+    mpHands.onResults(render);
+
+    mpCamera = new Camera(video, {
+      onFrame: async () => { await mpHands.send({ image: video }); },
+      width: CAM_W, height: CAM_H,
+    });
+    await mpCamera.start();
+    statusEl.textContent = 'CHUẨN BỊ TAY...';
+  } catch(e) {
+    errBox.classList.add('show');
+    errMsg.innerHTML = `MediaPipe error:<br>${e.message}<br><br>Thử dùng Chrome hoặc Safari mới nhất`;
+  }
+}
+
+async function startApp() {
+  document.getElementById('overlay').classList.add('hidden');
+  await initMediaPipe();
+}
+
+// ── Prevent scroll / zoom on mobile ──────────────────────
+document.addEventListener('touchmove', e => e.preventDefault(), { passive:false });
+document.addEventListener('gesturestart', e => e.preventDefault());
+</script>
+</body>
+</html>
