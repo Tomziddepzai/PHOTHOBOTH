@@ -572,10 +572,35 @@ function captureShot1(q, bb) {
   tc.restore();
 
   frozenBg = tmp;
+  // Save the quad so shot2 uses same frame
+  window._shot1Q  = q;
+  window._shot1BB = bb;
+
   phase = 'shot2';
   stableStart = 0; lastBB = null; bbBuf = [];
   timerLbl.classList.remove('show');
-  phaseLabel.textContent = 'Shot 2 — giữ khung 5s';
+  phaseLabel.textContent = 'Shot 2 — tự chụp sau 5s';
+
+  // Start auto countdown immediately — no hands needed
+  const shot2Start = Date.now();
+  function shot2Tick() {
+    if (phase !== 'shot2') return; // cancelled by resetAll
+    const elapsed  = Date.now() - shot2Start;
+    const progress = Math.min(elapsed / SHOT2_MS, 1);
+    const sec      = Math.ceil((SHOT2_MS - elapsed) / 1000);
+
+    timerLbl.textContent = sec > 0 ? String(sec) : '✦';
+    timerLbl.classList.add('show');
+    phaseLabel.textContent = `Shot 2 · ${sec > 0 ? sec + 's' : '✦'}`;
+
+    if (progress >= 1) {
+      timerLbl.classList.remove('show');
+      captureShot2(window._shot1Q, window._shot1BB);
+    } else {
+      requestAnimationFrame(shot2Tick);
+    }
+  }
+  requestAnimationFrame(shot2Tick);
 }
 
 // ── SHOT 2: freeze inside the frame ─────────────────────────
@@ -662,8 +687,9 @@ function onResults(results) {
     drawVideo();
     ctx.fillStyle = 'rgba(4,4,14,.28)'; ctx.fillRect(0,0,CAM_W,CAM_H);
   } else {
-    // shot2: show frozen bg
+    // shot2: show frozen bg, countdown handled by shot2Tick rAF loop
     if (frozenBg) ctx.drawImage(frozenBg, 0, 0);
+    return; // nothing else to render in shot2
   }
 
   if (handsData.length >= 2) {
