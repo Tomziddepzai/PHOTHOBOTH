@@ -8,311 +8,214 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>FOTOGRAM</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Bebas+Neue&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Bebas+Neue&display=swap');
 
-*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html,body { width:100%; height:100%; overflow:hidden; background:#080810; touch-action:none; }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#080810;touch-action:none}
 
-/* ═══════════════════════════════════════
-INTRO PAGE
-═══════════════════════════════════════ */
-#intro {
-position:fixed; inset:0; z-index:1000;
-display:flex; flex-direction:column;
-align-items:center; justify-content:center;
-background:#080810;
-transition: opacity .8s ease, visibility .8s;
+/* ══════════════ INTRO ══════════════ */
+#intro{
+position:fixed;inset:0;z-index:1000;
+display:flex;flex-direction:column;align-items:center;justify-content:center;
+background:#080810;transition:opacity .8s ease,visibility .8s;
 }
-#intro.out { opacity:0; visibility:hidden; pointer-events:none; }
+#intro.out{opacity:0;visibility:hidden;pointer-events:none}
 
-.intro-bg {
-position:absolute; inset:0;
+.intro-bg{
+position:absolute;inset:0;
 background:
-radial-gradient(ellipse 60% 50% at 20% 30%, rgba(60,80,180,.18) 0%, transparent 70%),
-radial-gradient(ellipse 50% 60% at 80% 70%, rgba(120,60,160,.14) 0%, transparent 70%),
-radial-gradient(ellipse 40% 40% at 60% 20%, rgba(40,100,200,.10) 0%, transparent 60%);
+radial-gradient(ellipse 60% 50% at 20% 30%,rgba(60,80,180,.18) 0%,transparent 70%),
+radial-gradient(ellipse 50% 60% at 80% 70%,rgba(120,60,160,.14) 0%,transparent 70%),
+radial-gradient(ellipse 40% 40% at 60% 20%,rgba(40,100,200,.10) 0%,transparent 60%);
 }
+.intro-bg::after{
+content:’’;position:absolute;inset:-50%;width:200%;height:200%;
+background-image:url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 512 512’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘n’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.75’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23n)’ opacity=‘1’/%3E%3C/svg%3E”);
+opacity:.032;animation:grain 1.2s steps(2) infinite;
+}
+@keyframes grain{
+0%{transform:translate(0,0)}25%{transform:translate(-2%,-3%)}
+50%{transform:translate(3%,1%)}75%{transform:translate(-1%,3%)}100%{transform:translate(2%,-1%)}
+}
+.intro-lines{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.intro-lines::before,.intro-lines::after{
+content:’’;position:absolute;border:1px solid rgba(160,180,255,.07);border-radius:50%;
+animation:breathe 6s ease-in-out infinite;
+}
+.intro-lines::before{width:70vmax;height:70vmax;top:50%;left:50%;transform:translate(-50%,-50%)}
+.intro-lines::after{width:50vmax;height:50vmax;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:-3s}
+@keyframes breathe{0%,100%{opacity:.4;transform:translate(-50%,-50%) scale(1)}50%{opacity:.8;transform:translate(-50%,-50%) scale(1.04)}}
 
-/* Animated grain */
-.intro-bg::after {
-content:’’; position:absolute; inset:-50%;
-width:200%; height:200%;
-background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 512 512’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘n’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.75’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23n)’ opacity=‘1’/%3E%3C/svg%3E”);
-opacity:.035; animation: grain 1.2s steps(2) infinite;
-}
-@keyframes grain {
-0%   { transform: translate(0,0); }
-25%  { transform: translate(-2%,-3%); }
-50%  { transform: translate(3%,1%); }
-75%  { transform: translate(-1%,3%); }
-100% { transform: translate(2%,-1%); }
-}
-
-.intro-logo {
-position:relative;
-font-family:‘Bebas Neue’,sans-serif;
-font-size: clamp(5rem,18vw,10rem);
-letter-spacing:.12em;
+.intro-logo{
+position:relative;font-family:‘Bebas Neue’,sans-serif;
+font-size:clamp(5rem,18vw,10rem);letter-spacing:.12em;
 color:transparent;
-background: linear-gradient(135deg, #c8d8ff 0%, #8090c8 40%, #e8d0a0 70%, #c8d8ff 100%);
--webkit-background-clip: text; background-clip: text;
-line-height:1;
-animation: shimmer 4s ease-in-out infinite;
-background-size: 200% 200%;
+background:linear-gradient(135deg,#c8d8ff 0%,#8090c8 40%,#e8d0a0 70%,#c8d8ff 100%);
+-webkit-background-clip:text;background-clip:text;
+line-height:1;animation:shimmer 4s ease-in-out infinite;background-size:200% 200%;
 }
-@keyframes shimmer {
-0%,100% { background-position: 0% 50%; }
-50%      { background-position: 100% 50%; }
+@keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.intro-sub{
+font-family:‘Cormorant Garamond’,serif;font-style:italic;
+font-size:clamp(.75rem,2.5vw,1rem);letter-spacing:.55em;
+color:rgba(180,200,255,.32);text-transform:uppercase;margin-top:-.4rem;
+}
+.mk{position:absolute;width:40px;height:40px;border-color:rgba(160,180,255,.18);border-style:solid}
+.mk.tl{top:24px;left:24px;border-width:1px 0 0 1px}
+.mk.tr{top:24px;right:24px;border-width:1px 1px 0 0}
+.mk.bl{bottom:24px;left:24px;border-width:0 0 1px 1px}
+.mk.br{bottom:24px;right:24px;border-width:0 1px 1px 0}
+.intro-btn{
+margin-top:3.5rem;background:transparent;
+border:1px solid rgba(180,200,255,.3);color:rgba(200,215,255,.7);
+font-family:‘Cormorant Garamond’,serif;font-size:clamp(.8rem,2vw,.95rem);
+letter-spacing:.35em;text-transform:uppercase;padding:14px 42px;cursor:pointer;
+border-radius:1px;transition:border-color .3s,color .3s,background .3s;-webkit-appearance:none;
+}
+.intro-btn:hover,.intro-btn:active{border-color:rgba(200,220,255,.7);color:rgba(220,235,255,.95);background:rgba(160,180,255,.06)}
+
+/* ══════════════ APP ══════════════ */
+#app{
+position:fixed;inset:0;z-index:10;
+display:none;align-items:center;justify-content:center;
+background:#04040c;
+}
+#app.active{display:flex}
+
+/*
+KEY: video is hidden, canvas covers full viewport using object-fit:cover logic.
+We draw video onto canvas with cover-crop math so no distortion.
+*/
+#videoEl{
+position:absolute;opacity:0;pointer-events:none;
+width:1px;height:1px;/* minimal, just needs to exist for MediaPipe */
 }
 
-.intro-sub {
-font-family:‘Cormorant Garamond’,serif;
-font-size:clamp(.75rem,2.5vw,1rem);
-letter-spacing:.55em;
-color:rgba(180,200,255,.35);
-text-transform:uppercase;
-margin-top:-.5rem;
-font-style:italic;
-}
-
-/* Decorative lines */
-.intro-lines {
-position:absolute; inset:0; pointer-events:none;
-overflow:hidden;
-}
-.intro-lines::before, .intro-lines::after {
-content:’’; position:absolute;
-border:1px solid rgba(160,180,255,.07);
-border-radius:50%;
-animation: breathe 6s ease-in-out infinite;
-}
-.intro-lines::before {
-width:70vmax; height:70vmax;
-top:50%; left:50%; transform:translate(-50%,-50%);
-}
-.intro-lines::after {
-width:50vmax; height:50vmax;
-top:50%; left:50%; transform:translate(-50%,-50%);
-animation-delay:-3s;
-}
-@keyframes breathe {
-0%,100% { opacity:.4; transform:translate(-50%,-50%) scale(1); }
-50%      { opacity:.8; transform:translate(-50%,-50%) scale(1.03); }
-}
-
-/* Corner marks */
-.mk { position:absolute; width:40px; height:40px; border-color:rgba(160,180,255,.18); border-style:solid; }
-.mk.tl { top:24px; left:24px; border-width:1px 0 0 1px; }
-.mk.tr { top:24px; right:24px; border-width:1px 1px 0 0; }
-.mk.bl { bottom:24px; left:24px; border-width:0 0 1px 1px; }
-.mk.br { bottom:24px; right:24px; border-width:0 1px 1px 0; }
-
-.intro-btn {
-margin-top:3.5rem; position:relative;
-background:transparent;
-border:1px solid rgba(180,200,255,.3);
-color:rgba(200,215,255,.7);
-font-family:‘Cormorant Garamond’,serif;
-font-size:clamp(.8rem,2vw,.95rem);
-letter-spacing:.35em; text-transform:uppercase;
-padding:14px 42px; cursor:pointer; border-radius:1px;
-transition: border-color .3s, color .3s, background .3s;
--webkit-appearance:none;
-}
-.intro-btn::before {
-content:’’; position:absolute; inset:-5px;
-border:1px solid rgba(180,200,255,.06);
-border-radius:2px;
-}
-.intro-btn:hover, .intro-btn:active {
-border-color:rgba(200,220,255,.7);
-color:rgba(220,235,255,.95);
-background:rgba(160,180,255,.06);
-}
-
-/* ═══════════════════════════════════════
-CAMERA PAGES (Shot1, Shot2)
-═══════════════════════════════════════ */
-#app {
-position:fixed; inset:0; z-index:10;
-display:none;
-flex-direction:column; align-items:center; justify-content:center;
-}
-#app.active { display:flex; }
-
-#videoEl { position:absolute; opacity:0; pointer-events:none; }
-
-#mainCanvas {
-display:block;
-max-width:100vw; max-height:100vh;
-touch-action:none;
+#mainCanvas{
+/* Fill viewport, letterbox/pillarbox with black — NO stretching */
+position:absolute;
+top:0;left:0;
+width:100%;height:100%;
+/* We handle aspect ratio in JS by setting canvas CSS size */
+display:block;touch-action:none;
 }
 
 /* HUD */
-#hud {
-position:fixed; top:0; left:0; right:0;
+#hud{
+position:fixed;top:0;left:0;right:0;
 padding:max(env(safe-area-inset-top),14px) 20px 10px;
-display:flex; align-items:center; justify-content:space-between;
-z-index:50; pointer-events:none;
+display:flex;align-items:center;justify-content:space-between;
+z-index:50;pointer-events:none;
 }
-.hud-label {
-font-family:‘Bebas Neue’,sans-serif;
-font-size:.9rem; letter-spacing:.2em;
-color:rgba(180,200,255,.6);
-}
-.hud-phase {
-font-family:‘Cormorant Garamond’,serif;
-font-style:italic;
-font-size:.7rem; letter-spacing:.2em;
-color:rgba(180,200,255,.4);
-}
+.hud-logo{font-family:‘Bebas Neue’,sans-serif;font-size:.95rem;letter-spacing:.22em;color:rgba(180,200,255,.55)}
+.hud-logo span{color:rgba(240,210,130,.6)}
+#phaseLabel{font-family:‘Cormorant Garamond’,serif;font-style:italic;font-size:.72rem;letter-spacing:.18em;color:rgba(180,200,255,.38)}
 
 /* Bottom bar */
-#bottomBar {
-position:fixed; bottom:0; left:0; right:0;
+#bottomBar{
+position:fixed;bottom:0;left:0;right:0;
 padding:10px 20px max(env(safe-area-inset-bottom),14px);
-display:flex; align-items:center; justify-content:center; gap:12px;
-z-index:50;
+display:flex;align-items:center;justify-content:center;z-index:50;
 }
-.cam-btn {
-background:rgba(160,180,255,.06);
-border:1px solid rgba(160,180,255,.2);
-color:rgba(180,200,255,.7);
-font-family:‘Cormorant Garamond’,serif;
-font-size:.75rem; letter-spacing:.2em; text-transform:uppercase;
-padding:9px 20px; cursor:pointer; border-radius:1px;
-transition:all .2s; -webkit-appearance:none;
+.cam-btn{
+background:rgba(160,180,255,.05);border:1px solid rgba(160,180,255,.18);
+color:rgba(180,200,255,.65);font-family:‘Cormorant Garamond’,serif;
+font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;
+padding:9px 22px;cursor:pointer;border-radius:1px;transition:all .2s;-webkit-appearance:none;
 }
-.cam-btn:active { background:rgba(160,180,255,.15); }
-.cam-btn.danger { border-color:rgba(255,100,100,.25); color:rgba(255,150,150,.7); }
+.cam-btn:active{background:rgba(160,180,255,.14)}
+
+/* Timer countdown */
+#timerLbl{
+position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+font-family:‘Bebas Neue’,sans-serif;font-size:clamp(4rem,15vw,7rem);
+color:rgba(240,210,130,.9);letter-spacing:.05em;
+pointer-events:none;z-index:60;
+opacity:0;transition:opacity .25s;
+text-shadow:0 0 50px rgba(240,210,130,.5),0 0 100px rgba(240,210,130,.25);
+}
+#timerLbl.show{opacity:1}
 
 /* Flash */
-#flash {
-position:fixed; inset:0; background:#fff; opacity:0;
-pointer-events:none; z-index:900; transition:opacity .05s;
-}
-#flash.go { opacity:.55; }
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:900;transition:opacity .06s}
+#flash.go{opacity:.55}
 
-/* Timer ring - drawn on canvas, but overlay label */
-#timerLabel {
-position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-font-family:‘Bebas Neue’,sans-serif; font-size:3.5rem;
-color:rgba(240,210,130,.85); letter-spacing:.05em;
-pointer-events:none; z-index:60;
-opacity:0; transition:opacity .3s;
-text-shadow: 0 0 40px rgba(240,210,130,.5);
+/* ══════════════ SAVE PAGE ══════════════ */
+#savePage{
+position:fixed;inset:0;z-index:500;
+display:none;flex-direction:column;align-items:center;justify-content:center;
+background:#080810;
 }
-#timerLabel.show { opacity:1; }
+#savePage.active{display:flex}
+.save-bg{
+position:absolute;inset:0;
+background:
+radial-gradient(ellipse 50% 40% at 30% 60%,rgba(60,80,180,.12) 0%,transparent 70%),
+radial-gradient(ellipse 40% 50% at 75% 30%,rgba(100,50,140,.10) 0%,transparent 70%);
+}
+#resultCanvas{
+position:relative;z-index:1;
+/* Responsive: fit inside viewport with padding */
+max-width:min(92vw, 92vh * 1.6);
+max-height:min(92vh, 92vw * 0.625);
+display:block;
+border:1px solid rgba(160,180,255,.12);
+box-shadow:0 0 60px rgba(100,120,200,.12),0 0 120px rgba(80,80,160,.08);
+}
+.save-actions{position:relative;z-index:1;display:flex;gap:12px;margin-top:20px}
+.save-btn{
+background:transparent;border:1px solid rgba(160,180,255,.28);color:rgba(200,215,255,.72);
+font-family:‘Cormorant Garamond’,serif;font-size:.78rem;letter-spacing:.25em;text-transform:uppercase;
+padding:11px 26px;cursor:pointer;border-radius:1px;transition:all .25s;-webkit-appearance:none;
+}
+.save-btn:active{background:rgba(160,180,255,.1)}
+.save-btn.primary{background:rgba(160,180,255,.1);border-color:rgba(180,200,255,.48);color:rgba(220,235,255,.9)}
+.save-note{
+position:relative;z-index:1;
+font-family:‘Cormorant Garamond’,serif;font-style:italic;
+font-size:.62rem;letter-spacing:.15em;color:rgba(160,180,255,.28);margin-top:12px;
+}
 
 /* Error */
-#errBox {
-position:fixed; inset:0; background:#080810;
-display:none; flex-direction:column;
-align-items:center; justify-content:center; gap:16px;
-z-index:950; padding:32px; text-align:center;
-}
-#errBox.show { display:flex; }
-#errBox h2 { font-family:‘Bebas Neue’,sans-serif; font-size:2rem; color:#ff8080; letter-spacing:.1em; }
-#errBox p  { font-family:‘Cormorant Garamond’,serif; font-size:.9rem; line-height:1.9; color:rgba(180,200,255,.6); max-width:280px; }
-
-/* ═══════════════════════════════════════
-SAVE PAGE
-═══════════════════════════════════════ */
-#savePage {
-position:fixed; inset:0; z-index:500;
-display:none; flex-direction:column;
-align-items:center; justify-content:center;
-background:#080810;
-transition:opacity .5s;
-}
-#savePage.active { display:flex; }
-
-.save-bg {
-position:absolute; inset:0;
-background:
-radial-gradient(ellipse 50% 40% at 30% 60%, rgba(60,80,180,.12) 0%, transparent 70%),
-radial-gradient(ellipse 40% 50% at 75% 30%, rgba(100,50,140,.10) 0%, transparent 70%);
-}
-
-#resultCanvas {
-max-width: min(90vw, 90vh * 1.333);
-max-height: min(90vh, 90vw * 0.75);
-border:1px solid rgba(160,180,255,.12);
-border-radius:1px;
-box-shadow: 0 0 60px rgba(100,120,200,.12), 0 0 120px rgba(80,80,160,.08);
-display:block;
-}
-
-.save-actions {
-display:flex; gap:12px; margin-top:20px;
-}
-.save-btn {
-background:transparent;
-border:1px solid rgba(160,180,255,.3);
-color:rgba(200,215,255,.75);
-font-family:‘Cormorant Garamond’,serif;
-font-size:.8rem; letter-spacing:.25em; text-transform:uppercase;
-padding:11px 28px; cursor:pointer; border-radius:1px;
-transition:all .25s; -webkit-appearance:none;
-}
-.save-btn:active { background:rgba(160,180,255,.1); }
-.save-btn.primary {
-background:rgba(160,180,255,.1);
-border-color:rgba(180,200,255,.5);
-color:rgba(220,235,255,.9);
-}
-.save-note {
-font-family:‘Cormorant Garamond’,serif; font-style:italic;
-font-size:.65rem; letter-spacing:.15em;
-color:rgba(160,180,255,.3);
-margin-top:12px;
-}
+#errBox{position:fixed;inset:0;background:#080810;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:950;padding:32px;text-align:center}
+#errBox.show{display:flex}
+#errBox h2{font-family:‘Bebas Neue’,sans-serif;font-size:2rem;color:#ff8080;letter-spacing:.1em}
+#errBox p{font-family:‘Cormorant Garamond’,serif;font-size:.9rem;line-height:1.9;color:rgba(180,200,255,.6);max-width:280px}
 </style>
 
 </head>
 <body>
 
-<!-- ── FLASH ── -->
-
 <div id="flash"></div>
-<div id="timerLabel"></div>
+<div id="timerLbl"></div>
 
-<!-- ══════════════════════════════
-     INTRO
-══════════════════════════════ -->
+<!-- INTRO -->
 
 <div id="intro">
   <div class="intro-bg"></div>
   <div class="intro-lines"></div>
   <div class="mk tl"></div><div class="mk tr"></div>
   <div class="mk bl"></div><div class="mk br"></div>
-
   <div class="intro-logo">FOTOGRAM</div>
   <div class="intro-sub">love</div>
   <button class="intro-btn" onclick="startApp()">Bắt đầu</button>
 </div>
 
-<!-- ══════════════════════════════
-     APP (camera)
-══════════════════════════════ -->
+<!-- APP -->
 
 <div id="app">
-  <video id="videoEl" playsinline autoplay muted webkit-playsinline></video>
+  <video id="videoEl" playsinline autoplay muted webkit-playsinline x5-playsinline></video>
   <canvas id="mainCanvas"></canvas>
-
   <div id="hud">
-    <span class="hud-label">FOTOGRAM</span>
-    <span class="hud-phase" id="phaseLabel">—</span>
+    <div class="hud-logo">FOTO<span>✦</span>GRAM</div>
+    <div id="phaseLabel">—</div>
   </div>
-
   <div id="bottomBar">
-    <button class="cam-btn danger" onclick="resetAll()">↺ Làm lại</button>
+    <button class="cam-btn" onclick="resetAll()">↺ Làm lại</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════
-     SAVE PAGE
-══════════════════════════════ -->
+<!-- SAVE PAGE -->
 
 <div id="savePage">
   <div class="save-bg"></div>
@@ -321,504 +224,580 @@ margin-top:12px;
     <button class="save-btn" onclick="resetAll()">↺ Chụp lại</button>
     <button class="save-btn primary" onclick="downloadPhoto()">↓ Lưu ảnh</button>
   </div>
-  <div class="save-note">Giữ ngón tay → tự chụp sau 3 giây</div>
+  <div class="save-note">giữ khung ổn định · tự động chụp</div>
 </div>
 
-<!-- ══════════════════════════════
-     ERROR
-══════════════════════════════ -->
+<!-- ERROR -->
 
-<div id="errBox" id="errBox">
+<div id="errBox">
   <h2>CAMERA ERROR</h2>
   <p id="errMsg"></p>
   <button class="intro-btn" style="margin-top:8px" onclick="retryCamera()">Thử lại</button>
 </div>
-
-<!-- MediaPipe -->
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 
 <script>
-// ══════════════════════════════════════════════
-//  ELEMENTS
-// ══════════════════════════════════════════════
-const video       = document.getElementById('videoEl');
-const canvas      = document.getElementById('mainCanvas');
-const ctx         = canvas.getContext('2d');
-const resultCvs   = document.getElementById('resultCanvas');
-const rctx        = resultCvs.getContext('2d');
-const flash       = document.getElementById('flash');
-const timerLbl    = document.getElementById('timerLabel');
-const phaseLabel  = document.getElementById('phaseLabel');
+// ════════════════════════════════════════════════
+//  SETUP
+// ════════════════════════════════════════════════
+const video      = document.getElementById('videoEl');
+const canvas     = document.getElementById('mainCanvas');
+const ctx        = canvas.getContext('2d');
+const resultCvs  = document.getElementById('resultCanvas');
+const rctx       = resultCvs.getContext('2d');
+const flash      = document.getElementById('flash');
+const timerLbl   = document.getElementById('timerLbl');
+const phaseLabel = document.getElementById('phaseLabel');
 
-// Internal resolution
-const W = 640, H = 480;
-canvas.width  = W; canvas.height = H;
-resultCvs.width = W; resultCvs.height = H;
+// Camera native resolution
+const CAM_W = 1280, CAM_H = 720;
 
-// ══════════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════════
-/*
-  PHASES:
-  'shot1' → user creates frame with hands → outside frozen after 3s stable
-  'shot2' → frame still shown → inside captured after 3s stable
-  'save'  → show result
-*/
-let phase          = 'shot1';
-let handsData      = [];
-let animT          = 0;
+// Canvas internal resolution = camera resolution
+canvas.width  = CAM_W;
+canvas.height = CAM_H;
+resultCvs.width  = CAM_W;
+resultCvs.height = CAM_H;
 
-// Shot1 state
-let frozenBg       = null;   // ImageData of background (outside frame)
-let shot1Done      = false;
-
-// Shot2 state  
-let frozenFace     = null;   // canvas with the face region
-let shot2Done      = false;
-
-// Timer state
-let stableMs       = 0;      // milliseconds frame has been stable
-let lastFrameRect  = null;   // {x,y,w,h}
-let lastFrameTime  = 0;
-const STABLE_DELAY = 3000;   // 3 seconds
-
-// Smoothing buffer for frame rect (reduce jitter)
-const SMOOTH_N = 8;
-let rectBuffer = [];
-
-// ══════════════════════════════════════════════
-//  RESIZE
-// ══════════════════════════════════════════════
+// ── Fit canvas to screen without distortion ──────
+// Strategy: fill screen with object-fit:cover equivalent
+// Canvas always renders at CAM_W x CAM_H internally
+// CSS scales it to cover the viewport (may crop edges)
+// This gives maximum size with no distortion.
 function resizeCanvas() {
   const sw = window.innerWidth, sh = window.innerHeight;
-  const ar = W / H;
-  const sar = sw / sh;
-  let dw, dh;
-  if (sar > ar) { dh = sh; dw = sh * ar; }
-  else          { dw = sw; dh = sw / ar; }
-  canvas.style.width  = dw + 'px';
-  canvas.style.height = dh + 'px';
+  const camAR = CAM_W / CAM_H;
+  const screenAR = sw / sh;
 
-  const rw = Math.min(sw * .9, sh * .9 * ar);
-  resultCvs.style.width  = rw + 'px';
-  resultCvs.style.height = (rw / ar) + 'px';
+  // "contain" — show all, add letterbox/pillarbox
+  // "cover"   — fill screen, may crop
+  // For camera viewfinder we use COVER (like phone camera app)
+  let cw, ch;
+  if (screenAR > camAR) {
+    cw = sw; ch = sw / camAR;
+  } else {
+    ch = sh; cw = sh * camAR;
+  }
+
+  // Center it
+  canvas.style.width  = cw + 'px';
+  canvas.style.height = ch + 'px';
+  canvas.style.left   = ((sw - cw) / 2) + 'px';
+  canvas.style.top    = ((sh - ch) / 2) + 'px';
+
+  // For result canvas: contain inside save page
+  const pad = 0.88;
+  const rAR = CAM_W / CAM_H;
+  const rw2 = Math.min(window.innerWidth * pad, window.innerHeight * pad * rAR);
+  const rh2 = rw2 / rAR;
+  resultCvs.style.width  = rw2 + 'px';
+  resultCvs.style.height = rh2 + 'px';
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
-window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 300));
+window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 350));
 
-// ══════════════════════════════════════════════
-//  LANDMARK HELPERS
-// ══════════════════════════════════════════════
-// MediaPipe Hands landmark indices
-// 4 = thumb tip, 8 = index finger tip
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+let phase       = 'shot1'; // 'shot1' | 'shot2' | 'save'
+let handsData   = [];
+let animT       = 0;
+
+let frozenBg    = null;   // canvas: outside of frame (shot1)
+let frozenFace  = null;   // { img:canvas, rect }  (shot2)
+
+// Timer
+const SHOT1_DELAY = 3000; // ms
+const SHOT2_DELAY = 5000; // ms
+let stableMs    = 0;
+let lastStableT = 0;
+let lastRect    = null;
+
+// Smoothing
+const SMOOTH_N  = 6;
+let rectBuf     = [];
+
+// ════════════════════════════════════════════════
+//  LANDMARK — mirror X so it aligns with mirrored video
+// ════════════════════════════════════════════════
 function lm(hand, idx) {
-  // Note: MediaPipe gives x,y normalized 0-1
-  // When we mirror the canvas, we need to also mirror x
-  const raw = hand[idx];
   return {
-    x: (1 - raw.x) * W,  // mirror X
-    y: raw.y * H
+    x: (1 - hand[idx].x) * CAM_W,
+    y: hand[idx].y * CAM_H
   };
 }
 
-function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+// ════════════════════════════════════════════════
+//  DRAW VIDEO TO CANVAS (mirrored, cover-crop)
+//  We always draw the full video mirrored.
+//  Canvas CSS handles the cover scaling.
+// ════════════════════════════════════════════════
+function drawVideo() {
+  ctx.save();
+  ctx.translate(CAM_W, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0, CAM_W, CAM_H);
+  ctx.restore();
+}
 
-// ══════════════════════════════════════════════
-//  GET FRAME RECT FROM 2 HANDS
-// ══════════════════════════════════════════════
-function getFrameRect(hands) {
-  if (hands.length < 2) return null;
+// ════════════════════════════════════════════════
+//  GET QUADRILATERAL CORNERS FROM 2 HANDS
+//  Corner A = thumb tip of hand 0   (lm index 4)
+//  Corner B = index tip of hand 0   (lm index 8)
+//  Corner C = thumb tip of hand 1   (lm index 4)
+//  Corner D = index tip of hand 1   (lm index 8)
+//  The "frame" is a quad: A-B on one side, C-D on the other
+//
+//  Actually we want the rectangle defined by:
+//  hand0_thumb ←→ hand1_thumb  (top edge)
+//  hand0_index ←→ hand1_index  (bottom edge? or diagonal)
+//
+//  Simplest correct interpretation:
+//  The 4 corners of the frame = the 4 fingertips directly
+// ════════════════════════════════════════════════
+function getQuad(hands) {
+  // hand 0: thumb tip = pt0, index tip = pt1
+  // hand 1: thumb tip = pt2, index tip = pt3
+  const pt0 = lm(hands[0], 4); // thumb hand0
+  const pt1 = lm(hands[0], 8); // index hand0
+  const pt2 = lm(hands[1], 4); // thumb hand1
+  const pt3 = lm(hands[1], 8); // index hand1
+  // quad corners in order: pt0, pt2, pt3, pt1 (so it draws a proper rectangle-ish)
+  return { pt0, pt1, pt2, pt3 };
+}
 
-  // Use thumb tip (4) and index tip (8) of each hand
-  // Corner of frame = midpoint between thumb & index of each hand
-  const h0_thumb = lm(hands[0], 4);
-  const h0_index = lm(hands[0], 8);
-  const h1_thumb = lm(hands[1], 4);
-  const h1_index = lm(hands[1], 8);
+// Bounding box of quad
+function quadBBox(q) {
+  const xs = [q.pt0.x, q.pt1.x, q.pt2.x, q.pt3.x];
+  const ys = [q.pt0.y, q.pt1.y, q.pt2.y, q.pt3.y];
+  const x = Math.min(...xs), y = Math.min(...ys);
+  const w = Math.max(...xs) - x, h = Math.max(...ys) - y;
+  return { x, y, w, h };
+}
 
-  const c1 = { x: (h0_thumb.x + h0_index.x) / 2, y: (h0_thumb.y + h0_index.y) / 2 };
-  const c2 = { x: (h1_thumb.x + h1_index.x) / 2, y: (h1_thumb.y + h1_index.y) / 2 };
-
+// Smooth bounding box
+function smoothBBox(bb) {
+  rectBuf.push(bb);
+  if (rectBuf.length > SMOOTH_N) rectBuf.shift();
+  const n = rectBuf.length;
   return {
-    x: Math.min(c1.x, c2.x),
-    y: Math.min(c1.y, c2.y),
-    w: Math.abs(c2.x - c1.x),
-    h: Math.abs(c2.y - c1.y),
-    c1, c2
+    x: rectBuf.reduce((s,v)=>s+v.x,0)/n,
+    y: rectBuf.reduce((s,v)=>s+v.y,0)/n,
+    w: rectBuf.reduce((s,v)=>s+v.w,0)/n,
+    h: rectBuf.reduce((s,v)=>s+v.h,0)/n,
   };
 }
 
-// ══════════════════════════════════════════════
-//  SMOOTH RECT BUFFER
-// ══════════════════════════════════════════════
-function smoothRect(r) {
-  rectBuffer.push(r);
-  if (rectBuffer.length > SMOOTH_N) rectBuffer.shift();
-  const n = rectBuffer.length;
-  return {
-    x: rectBuffer.reduce((s,v)=>s+v.x,0)/n,
-    y: rectBuffer.reduce((s,v)=>s+v.y,0)/n,
-    w: rectBuffer.reduce((s,v)=>s+v.w,0)/n,
-    h: rectBuffer.reduce((s,v)=>s+v.h,0)/n,
-  };
+// ════════════════════════════════════════════════
+//  STABILITY CHECK
+// ════════════════════════════════════════════════
+function checkStable(bb) {
+  if (!lastRect) { lastRect = bb; lastStableT = Date.now(); return false; }
+  const d = Math.abs(bb.x-lastRect.x)+Math.abs(bb.y-lastRect.y)
+           +Math.abs(bb.w-lastRect.w)+Math.abs(bb.h-lastRect.h);
+  lastRect = bb;
+  return d < 28; // px total drift threshold
 }
 
-// ══════════════════════════════════════════════
-//  CHECK STABILITY
-// ══════════════════════════════════════════════
-function isStable(rect) {
-  if (!lastFrameRect) return false;
-  const delta = Math.abs(rect.x - lastFrameRect.x)
-              + Math.abs(rect.y - lastFrameRect.y)
-              + Math.abs(rect.w - lastFrameRect.w)
-              + Math.abs(rect.h - lastFrameRect.h);
-  return delta < 20; // pixels total movement threshold
-}
-
-// ══════════════════════════════════════════════
-//  FLASH EFFECT
-// ══════════════════════════════════════════════
+// ════════════════════════════════════════════════
+//  FLASH
+// ════════════════════════════════════════════════
 function doFlash() {
   flash.classList.add('go');
   setTimeout(() => flash.classList.remove('go'), 130);
 }
 
-// ══════════════════════════════════════════════
-//  SHOT 1 CAPTURE — freeze OUTSIDE the frame
-// ══════════════════════════════════════════════
-function captureShot1(rect) {
-  doFlash();
+// ════════════════════════════════════════════════
+//  DRAW QUAD FRAME (4 corners on fingertips)
+// ════════════════════════════════════════════════
+function drawQuadFrame(q, progress) {
+  const { pt0, pt1, pt2, pt3 } = q;
+  // Order for a non-crossing quad:
+  // pt0 (h0 thumb) → pt2 (h1 thumb) → pt3 (h1 index) → pt1 (h0 index) → close
+  const pts = [pt0, pt2, pt3, pt1];
 
-  // Draw full mirrored video to a temp canvas
-  const tmp = document.createElement('canvas');
-  tmp.width = W; tmp.height = H;
-  const tc = tmp.getContext('2d');
-  tc.translate(W, 0); tc.scale(-1, 1);
-  tc.drawImage(video, 0, 0, W, H);
+  // Clip to quad and show live video inside
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.closePath();
+  ctx.clip();
+  drawVideo();
+  ctx.fillStyle = 'rgba(120,160,255,.08)';
+  ctx.fillRect(0, 0, CAM_W, CAM_H);
+  ctx.restore();
 
-  // Punch a transparent hole where the frame is
-  tc.clearRect(rect.x, rect.y, rect.w, rect.h);
+  // Border glow
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.closePath();
+  ctx.shadowColor = 'rgba(180,220,255,.9)';
+  ctx.shadowBlur  = 18;
+  ctx.strokeStyle = `rgba(228,244,255,${.5 + progress * .45})`;
+  ctx.lineWidth   = 2;
+  ctx.stroke();
+  ctx.restore();
 
-  frozenBg = tmp; // store the canvas (outside only)
-  shot1Done = true;
-  phase = 'shot2';
-  stableMs = 0; lastFrameRect = null; rectBuffer = [];
-  phaseLabel.textContent = 'Giữ khung — shot 2';
+  // Corner dots on each fingertip
+  pts.forEach((p, i) => {
+    ctx.save();
+    ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI*2);
+    ctx.fillStyle   = 'rgba(240,210,130,.92)';
+    ctx.shadowColor = 'rgba(240,210,130,.8)';
+    ctx.shadowBlur  = 14;
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // Timer arc around frame centroid
+  if (progress > 0.01) {
+    const cx = pts.reduce((s,p)=>s+p.x,0)/4;
+    const cy = pts.reduce((s,p)=>s+p.y,0)/4;
+    const bb  = quadBBox(q);
+    const rad = Math.min(bb.w, bb.h) * 0.44;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, rad, -Math.PI/2, -Math.PI/2 + progress*Math.PI*2);
+    ctx.strokeStyle = `rgba(240,210,130,${.35 + progress*.55})`;
+    ctx.lineWidth   = 3;
+    ctx.shadowColor = 'rgba(240,210,130,.7)';
+    ctx.shadowBlur  = 16;
+    ctx.stroke();
+    ctx.restore();
+  }
 }
 
-// ══════════════════════════════════════════════
-//  SHOT 2 CAPTURE — freeze INSIDE the frame
-// ══════════════════════════════════════════════
-function captureShot2(rect) {
+// ════════════════════════════════════════════════
+//  SHOT 1 CAPTURE — freeze everything OUTSIDE frame
+// ════════════════════════════════════════════════
+function captureShot1(q, bb) {
   doFlash();
 
-  // Capture just the face area (inner frame)
+  // Draw full mirrored video to offscreen
   const tmp = document.createElement('canvas');
-  tmp.width = rect.w; tmp.height = rect.h;
+  tmp.width = CAM_W; tmp.height = CAM_H;
   const tc = tmp.getContext('2d');
-  tc.translate(rect.w, 0); tc.scale(-1, 1);
-  tc.drawImage(video, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w, rect.h);
+  tc.translate(CAM_W, 0); tc.scale(-1, 1);
+  tc.drawImage(video, 0, 0, CAM_W, CAM_H);
 
-  frozenFace = { img: tmp, rect };
-  shot2Done = true;
+  // Cut out the quad (transparent hole = inside frame)
+  const { pt0, pt1, pt2, pt3 } = q;
+  const pts = [pt0, pt2, pt3, pt1];
+  tc.save();
+  tc.globalCompositeOperation = 'destination-out';
+  tc.beginPath();
+  tc.moveTo(pts[0].x, pts[0].y);
+  pts.slice(1).forEach(p => tc.lineTo(p.x, p.y));
+  tc.closePath();
+  tc.fill();
+  tc.restore();
 
-  // Compose final result
-  composeFinal(rect);
+  frozenBg = tmp;
+  // Save the quad for shot2
+  window._frozenQuad = { q, pts, bb };
+
+  phase = 'shot2';
+  stableMs = 0; lastRect = null; rectBuf = [];
+  phaseLabel.textContent = 'Shot 2 — giữ khung · 5s';
+  timerLbl.classList.remove('show');
+}
+
+// ════════════════════════════════════════════════
+//  SHOT 2 CAPTURE — freeze face INSIDE frame
+// ════════════════════════════════════════════════
+function captureShot2(q, bb) {
+  doFlash();
+
+  // Capture the bounding box region from live video
+  const tmp = document.createElement('canvas');
+  tmp.width = bb.w; tmp.height = bb.h;
+  const tc = tmp.getContext('2d');
+  tc.translate(bb.w, 0); tc.scale(-1, 1);
+  tc.drawImage(video, bb.x, bb.y, bb.w, bb.h, 0, 0, bb.w, bb.h);
+
+  frozenFace = { img: tmp, bb };
+
+  composeFinal(q, bb);
   showSavePage();
 }
 
-// ══════════════════════════════════════════════
-//  COMPOSE FINAL IMAGE
-// ══════════════════════════════════════════════
-function composeFinal(rect) {
-  // 1. Draw frozen bg (outside frame)
-  rctx.clearRect(0, 0, W, H);
+// ════════════════════════════════════════════════
+//  COMPOSE FINAL
+// ════════════════════════════════════════════════
+function composeFinal(q, bb) {
+  rctx.clearRect(0, 0, CAM_W, CAM_H);
+
+  // 1. Frozen background (outside, with hole)
   rctx.drawImage(frozenBg, 0, 0);
 
-  // 2. Draw frozen face inside frame
-  rctx.drawImage(frozenFace.img, rect.x, rect.y, rect.w, rect.h);
-
-  // 3. Draw glass border on the frame
+  // 2. Live face inside quad region
   rctx.save();
-  rctx.shadowColor = 'rgba(200,225,255,.9)';
-  rctx.shadowBlur  = 12;
-  rctx.strokeStyle = 'rgba(230,245,255,.85)';
-  rctx.lineWidth   = 1.5;
-  rctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-
-  // Corner dots
-  [[rect.x,rect.y],[rect.x+rect.w,rect.y],[rect.x,rect.y+rect.h],[rect.x+rect.w,rect.y+rect.h]]
-    .forEach(([cx,cy]) => {
-      rctx.beginPath(); rctx.arc(cx, cy, 4, 0, Math.PI*2);
-      rctx.fillStyle = 'rgba(240,210,130,.9)';
-      rctx.shadowColor = 'rgba(240,210,130,.8)';
-      rctx.fill();
-    });
-
-  // Glass tint overlay inside frame
+  const { pt0, pt1, pt2, pt3 } = q;
+  const pts = [pt0, pt2, pt3, pt1];
+  rctx.beginPath();
+  rctx.moveTo(pts[0].x, pts[0].y);
+  pts.slice(1).forEach(p => rctx.lineTo(p.x, p.y));
+  rctx.closePath();
+  rctx.clip();
+  rctx.drawImage(frozenFace.img, bb.x, bb.y, bb.w, bb.h);
   rctx.fillStyle = 'rgba(140,170,255,.07)';
-  rctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+  rctx.fillRect(0,0,CAM_W,CAM_H);
   rctx.restore();
 
-  // 4. Subtle vignette
-  const vg = rctx.createRadialGradient(W/2,H/2,H*.3,W/2,H/2,H*.8);
+  // 3. Frame border
+  rctx.save();
+  rctx.beginPath();
+  rctx.moveTo(pts[0].x, pts[0].y);
+  pts.slice(1).forEach(p => rctx.lineTo(p.x, p.y));
+  rctx.closePath();
+  rctx.shadowColor = 'rgba(200,225,255,.9)';
+  rctx.shadowBlur  = 14;
+  rctx.strokeStyle = 'rgba(230,245,255,.85)';
+  rctx.lineWidth   = 2;
+  rctx.stroke();
+  pts.forEach(p => {
+    rctx.beginPath(); rctx.arc(p.x, p.y, 5, 0, Math.PI*2);
+    rctx.fillStyle = 'rgba(240,210,130,.9)';
+    rctx.shadowColor = 'rgba(240,210,130,.8)';
+    rctx.fill();
+  });
+  rctx.restore();
+
+  // 4. Vignette
+  const vg = rctx.createRadialGradient(CAM_W/2,CAM_H/2,CAM_H*.3,CAM_W/2,CAM_H/2,CAM_H*.8);
   vg.addColorStop(0,'transparent');
-  vg.addColorStop(1,'rgba(4,4,12,.45)');
+  vg.addColorStop(1,'rgba(4,4,12,.4)');
   rctx.fillStyle = vg;
-  rctx.fillRect(0,0,W,H);
+  rctx.fillRect(0,0,CAM_W,CAM_H);
 }
 
-// ══════════════════════════════════════════════
-//  SHOW/HIDE PAGES
-// ══════════════════════════════════════════════
+// ════════════════════════════════════════════════
+//  SHOW SAVE PAGE
+// ════════════════════════════════════════════════
 function showSavePage() {
   phase = 'save';
+  timerLbl.classList.remove('show');
   document.getElementById('savePage').classList.add('active');
 }
 
 function resetAll() {
-  phase      = 'shot1';
-  frozenBg   = null; frozenFace = null;
-  shot1Done  = false; shot2Done  = false;
-  stableMs   = 0; lastFrameRect = null; rectBuffer = [];
+  phase = 'shot1';
+  frozenBg = null; frozenFace = null;
+  stableMs = 0; lastRect = null; rectBuf = [];
+  window._frozenQuad = null;
   timerLbl.classList.remove('show');
-  phaseLabel.textContent = 'Tạo khung — shot 1';
+  phaseLabel.textContent = 'Shot 1 — tạo khung';
   document.getElementById('savePage').classList.remove('active');
 }
 
 function downloadPhoto() {
   const a = document.createElement('a');
   a.download = 'fotogram-' + Date.now() + '.jpg';
-  a.href = resultCvs.toDataURL('image/jpeg', .92);
+  a.href = resultCvs.toDataURL('image/jpeg', .93);
   a.click();
 }
 
-// ══════════════════════════════════════════════
-//  DRAW HAND DOTS (debug / visual feedback)
-// ══════════════════════════════════════════════
-function drawHandDots(hands) {
+// ════════════════════════════════════════════════
+//  DRAW HAND DOTS (fingertip visual feedback)
+// ════════════════════════════════════════════════
+function drawDots(hands) {
   hands.forEach(hand => {
     [4, 8].forEach(idx => {
       const p = lm(hand, idx);
       ctx.save();
-      ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI*2);
-      ctx.fillStyle = idx === 4 ? 'rgba(240,210,130,.85)' : 'rgba(180,220,255,.85)';
-      ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI*2);
+      ctx.fillStyle   = idx === 4 ? 'rgba(240,210,130,.8)' : 'rgba(180,220,255,.8)';
+      ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 12;
       ctx.fill(); ctx.restore();
     });
-
-    // Line between thumb and index
-    const t = lm(hand, 4), i = lm(hand, 8);
+    // Line between thumb and index of same hand
+    const t = lm(hand,4), ix = lm(hand,8);
     ctx.save();
-    ctx.beginPath(); ctx.moveTo(t.x, t.y); ctx.lineTo(i.x, i.y);
-    ctx.strokeStyle = 'rgba(200,220,255,.25)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(t.x,t.y); ctx.lineTo(ix.x,ix.y);
+    ctx.strokeStyle='rgba(200,220,255,.2)'; ctx.lineWidth=1.5;
     ctx.stroke(); ctx.restore();
   });
 }
 
-// ══════════════════════════════════════════════
-//  DRAW FRAME
-// ══════════════════════════════════════════════
-function drawFrameRect(rect, progress) {
-  // Clip preview inside frame
-  ctx.save();
-  ctx.beginPath(); ctx.rect(rect.x, rect.y, rect.w, rect.h); ctx.clip();
-  ctx.translate(W, 0); ctx.scale(-1, 1);
-  ctx.drawImage(video, 0, 0, W, H);
-  ctx.restore();
-
-  // Glass tint
-  ctx.save();
-  ctx.beginPath(); ctx.rect(rect.x, rect.y, rect.w, rect.h); ctx.clip();
-  ctx.fillStyle = 'rgba(120,160,255,.08)'; ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
-  ctx.restore();
-
-  // Border
-  ctx.save();
-  ctx.shadowColor = 'rgba(180,220,255,.9)'; ctx.shadowBlur = 14;
-  ctx.strokeStyle = `rgba(225,242,255,${.5 + progress * .4})`;
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-
-  // Corner dots
-  [[rect.x,rect.y],[rect.x+rect.w,rect.y],[rect.x,rect.y+rect.h],[rect.x+rect.w,rect.y+rect.h]]
-    .forEach(([cx,cy]) => {
-      ctx.beginPath(); ctx.arc(cx, cy, 3.5, 0, Math.PI*2);
-      ctx.fillStyle = 'rgba(240,210,130,.9)'; ctx.shadowColor = 'rgba(240,210,130,.8)';
-      ctx.fill();
-    });
-  ctx.restore();
-
-  // Progress arc (timer ring) around frame center
-  if (progress > 0) {
-    const cx = rect.x + rect.w / 2, cy = rect.y + rect.h / 2;
-    const rad = Math.min(rect.w, rect.h) * 0.48;
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, rad, -Math.PI/2, -Math.PI/2 + progress * Math.PI * 2);
-    ctx.strokeStyle = `rgba(240,210,130,${.4 + progress * .5})`;
-    ctx.lineWidth = 2; ctx.shadowColor = 'rgba(240,210,130,.7)'; ctx.shadowBlur = 12;
-    ctx.stroke(); ctx.restore();
-  }
-}
-
-// ══════════════════════════════════════════════
+// ════════════════════════════════════════════════
 //  MAIN RENDER
-// ══════════════════════════════════════════════
+// ════════════════════════════════════════════════
 function render(results) {
   animT += .018;
-  const now = Date.now();
-
-  ctx.clearRect(0, 0, W, H);
-
   if (phase === 'save') return;
 
-  // ── Draw base video ──
+  ctx.clearRect(0,0,CAM_W,CAM_H);
+
+  handsData = (results.multiHandLandmarks?.length > 0) ? results.multiHandLandmarks : [];
+
+  // ── SHOT 1 ──
   if (phase === 'shot1') {
-    // Normal mirrored video
-    ctx.save();
-    ctx.translate(W, 0); ctx.scale(-1, 1);
-    ctx.drawImage(video, 0, 0, W, H);
-    ctx.restore();
-    ctx.fillStyle = 'rgba(5,5,14,.3)'; ctx.fillRect(0,0,W,H);
+    drawVideo();
+    ctx.fillStyle='rgba(4,4,14,.28)'; ctx.fillRect(0,0,CAM_W,CAM_H);
 
-  } else if (phase === 'shot2') {
-    // Draw frozen background (outside)
+    if (handsData.length >= 2) {
+      const rawQ  = getQuad(handsData);
+      const rawBB = quadBBox(rawQ);
+      const bb    = smoothBBox(rawBB);
+
+      if (bb.w > 40 && bb.h > 40) {
+        const stable = checkStable(bb);
+        const now = Date.now();
+        if (stable) {
+          if (stableMs === 0) stableMs = now;
+        } else {
+          stableMs = 0;
+        }
+
+        const elapsed = stableMs > 0 ? now - stableMs : 0;
+        const progress = Math.min(elapsed / SHOT1_DELAY, 1);
+
+        // Re-build smoothed quad (use raw for fingertip dots)
+        drawQuadFrame(rawQ, progress);
+        drawDots(handsData);
+
+        // Timer label
+        if (elapsed > 400) {
+          const sec = Math.ceil((SHOT1_DELAY - elapsed) / 1000);
+          timerLbl.textContent = sec > 0 ? sec : '✦';
+          timerLbl.classList.add('show');
+        } else {
+          timerLbl.classList.remove('show');
+        }
+
+        if (progress >= 1) {
+          stableMs = 0;
+          captureShot1(rawQ, rawBB);
+        }
+
+        phaseLabel.textContent = elapsed > 400 ? `Shot 1 · ${Math.ceil((SHOT1_DELAY-elapsed)/1000)}s` : 'Shot 1 — giữ yên';
+      } else {
+        drawDots(handsData);
+        phaseLabel.textContent = 'Shot 1 — mở rộng tay ra';
+      }
+    } else {
+      stableMs = 0; lastRect = null;
+      timerLbl.classList.remove('show');
+      if (handsData.length === 1) drawDots(handsData);
+      // Hint text
+      ctx.font='bold 18px Cormorant Garamond,serif';
+      ctx.fillStyle='rgba(180,200,255,.3)'; ctx.textAlign='center';
+      ctx.fillText('Đưa 2 tay vào — tạo khung', CAM_W/2, CAM_H-24);
+      ctx.textAlign='left';
+      phaseLabel.textContent = 'Shot 1 — tạo khung';
+    }
+  }
+
+  // ── SHOT 2 ──
+  else if (phase === 'shot2') {
+    // Frozen bg
     if (frozenBg) ctx.drawImage(frozenBg, 0, 0);
-    // Live video only inside frame (drawn in drawFrameRect)
-  }
 
-  // ── Get hands ──
-  handsData = (results.multiHandLandmarks && results.multiHandLandmarks.length > 0)
-    ? results.multiHandLandmarks : [];
+    if (handsData.length >= 2) {
+      const rawQ  = getQuad(handsData);
+      const rawBB = quadBBox(rawQ);
+      const bb    = smoothBBox(rawBB);
 
-  if (handsData.length >= 2) {
-    const rawRect = getFrameRect(handsData);
-    if (!rawRect || rawRect.w < 30 || rawRect.h < 30) {
-      stableMs = 0; lastFrameRect = null;
-      drawHandDots(handsData);
-      return;
-    }
+      if (bb.w > 40 && bb.h > 40) {
+        const stable = checkStable(bb);
+        const now = Date.now();
+        if (stable) {
+          if (stableMs === 0) stableMs = now;
+        } else {
+          stableMs = 0;
+        }
 
-    const rect = smoothRect(rawRect);
+        const elapsed = stableMs > 0 ? now - stableMs : 0;
+        const progress = Math.min(elapsed / SHOT2_DELAY, 1);
 
-    // Check stability
-    const stable = isStable(rect);
-    if (stable) {
-      stableMs += (now - lastFrameTime);
+        drawQuadFrame(rawQ, progress);
+        drawDots(handsData);
+
+        if (elapsed > 400) {
+          const sec = Math.ceil((SHOT2_DELAY - elapsed) / 1000);
+          timerLbl.textContent = sec > 0 ? sec : '✦';
+          timerLbl.classList.add('show');
+        } else {
+          timerLbl.classList.remove('show');
+        }
+
+        if (progress >= 1) {
+          stableMs = 0;
+          captureShot2(rawQ, rawBB);
+        }
+
+        phaseLabel.textContent = elapsed > 400 ? `Shot 2 · ${Math.ceil((SHOT2_DELAY-elapsed)/1000)}s` : 'Shot 2 — giữ yên';
+      } else {
+        drawDots(handsData);
+        phaseLabel.textContent = 'Shot 2 — mở rộng tay ra';
+      }
     } else {
-      stableMs = 0;
-    }
-    lastFrameRect = rect;
-    lastFrameTime = now;
-
-    const progress = Math.min(stableMs / STABLE_DELAY, 1);
-
-    // Draw the frame
-    drawFrameRect(rect, progress);
-
-    // Draw hand dots
-    drawHandDots(handsData);
-
-    // Timer label (countdown)
-    if (stableMs > 300) {
-      const remaining = Math.ceil((STABLE_DELAY - stableMs) / 1000);
-      timerLbl.textContent = remaining > 0 ? remaining : '✦';
-      timerLbl.classList.add('show');
-    } else {
+      stableMs = 0; lastRect = null;
       timerLbl.classList.remove('show');
+      if (handsData.length === 1) drawDots(handsData);
+      ctx.font='bold 18px Cormorant Garamond,serif';
+      ctx.fillStyle='rgba(180,200,255,.3)'; ctx.textAlign='center';
+      ctx.fillText('Đưa 2 tay vào lại — chụp mặt', CAM_W/2, CAM_H-24);
+      ctx.textAlign='left';
+      phaseLabel.textContent = 'Shot 2 — tạo khung';
     }
-
-    // Auto capture at 100%
-    if (progress >= 1) {
-      timerLbl.classList.remove('show');
-      stableMs = 0; lastFrameRect = null; rectBuffer = [];
-      if (phase === 'shot1') captureShot1(rect);
-      else if (phase === 'shot2') captureShot2(rect);
-    }
-
-  } else {
-    // No 2 hands
-    stableMs = 0; lastFrameRect = null;
-    timerLbl.classList.remove('show');
-
-    if (handsData.length === 1) {
-      drawHandDots(handsData);
-      // Show 1-hand dashed hint
-      const t = lm(handsData[0], 4), i = lm(handsData[0], 8);
-      ctx.save();
-      ctx.setLineDash([5,5]); ctx.strokeStyle = 'rgba(180,210,255,.3)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(Math.min(t.x,i.x), Math.min(t.y,i.y), Math.abs(i.x-t.x), Math.abs(i.y-t.y));
-      ctx.restore();
-    }
-
-    // Idle scan line
-    const sy = ((now / 14) % H);
-    ctx.strokeStyle = 'rgba(160,190,255,.06)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(0,sy); ctx.lineTo(W,sy); ctx.stroke();
-
-    // Phase hint text on canvas
-    const msg = phase === 'shot1' ? 'Đưa 2 tay vào — tạo khung' : 'Đưa tay vào lại — chụp mặt';
-    ctx.font = '500 13px Cormorant Garamond, serif';
-    ctx.fillStyle = 'rgba(180,200,255,.35)';
-    ctx.textAlign = 'center';
-    ctx.fillText(msg, W/2, H - 18);
-    ctx.textAlign = 'left';
   }
-
-  // Phase label update
-  if (phase === 'shot1') phaseLabel.textContent = handsData.length >= 2 ? 'Giữ yên → 3s' : 'Shot 1 — tạo khung';
-  else if (phase === 'shot2') phaseLabel.textContent = handsData.length >= 2 ? 'Giữ yên → 3s' : 'Shot 2 — chụp mặt';
 }
 
-// ══════════════════════════════════════════════
-//  START
-// ══════════════════════════════════════════════
+// ════════════════════════════════════════════════
+//  CAMERA INIT (iOS-safe fallback chain)
+// ════════════════════════════════════════════════
+async function startCamera() {
+  const configs = [
+    { video:{ facingMode:'user', width:{ideal:1280}, height:{ideal:720} }, audio:false },
+    { video:{ facingMode:'user', width:{ideal:640},  height:{ideal:480} }, audio:false },
+    { video:{ facingMode:'user' }, audio:false },
+    { video:true, audio:false },
+  ];
+  for (const cfg of configs) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(cfg);
+      video.srcObject = stream;
+      video.setAttribute('playsinline','');
+      video.setAttribute('webkit-playsinline','');
+      await video.play();
+      return;
+    } catch(e) { /* try next */ }
+  }
+  throw new Error('Không thể truy cập camera');
+}
+
 async function retryCamera() {
   document.getElementById('errBox').classList.remove('show');
   await initMediaPipe();
 }
 
 async function initMediaPipe() {
-  phaseLabel.textContent = 'Loading...';
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode:'user', width:{ideal:640}, height:{ideal:480} },
-      audio: false
-    }).catch(() => navigator.mediaDevices.getUserMedia({ video:{facingMode:'user'}, audio:false }));
-
-    video.srcObject = stream;
-    video.setAttribute('playsinline','');
-    await video.play();
-  } catch(e) {
+  phaseLabel.textContent = 'Đang tải...';
+  try { await startCamera(); }
+  catch(e) {
     document.getElementById('errBox').classList.add('show');
     document.getElementById('errMsg').innerHTML =
-      `${e.name}: ${e.message}<br><br>• Mở bằng Safari trên iPhone<br>• Cần HTTPS hoặc localhost<br>• Cho phép quyền Camera`;
+      `${e.message}<br><br>• iPhone/iPad: mở bằng <b>Safari</b><br>• Cần <b>HTTPS</b> hoặc localhost<br>• Vào Settings → Safari → Camera → Allow`;
     return;
   }
 
-  const hands = new Hands({
-    locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
-  });
-  hands.setOptions({
-    maxNumHands: 2,
-    modelComplexity: 1,
-    minDetectionConfidence: .75,
-    minTrackingConfidence: .7,
-  });
+  const hands = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
+  hands.setOptions({ maxNumHands:2, modelComplexity:1, minDetectionConfidence:.72, minTrackingConfidence:.68 });
   hands.onResults(render);
 
+  // Use MediaPipe Camera util — it handles iOS frame grabbing properly
   const cam = new Camera(video, {
     onFrame: async () => { await hands.send({ image: video }); },
-    width: W, height: H
+    width: CAM_W, height: CAM_H,
   });
   await cam.start();
-
   phaseLabel.textContent = 'Shot 1 — tạo khung';
 }
 
@@ -828,6 +807,7 @@ function startApp() {
   initMediaPipe();
 }
 
+// Block scroll/zoom on touch
 document.addEventListener('touchmove', e => e.preventDefault(), { passive:false });
 document.addEventListener('gesturestart', e => e.preventDefault());
 </script>
