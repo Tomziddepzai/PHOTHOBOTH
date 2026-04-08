@@ -687,9 +687,16 @@ function onResults(results) {
     drawVideo();
     ctx.fillStyle = 'rgba(4,4,14,.28)'; ctx.fillRect(0,0,CAM_W,CAM_H);
   } else {
-    // shot2: show frozen bg, countdown handled by shot2Tick rAF loop
-    if (frozenBg) ctx.drawImage(frozenBg, 0, 0);
-    return; // nothing else to render in shot2
+    // shot2: frozen bg outside + live camera inside the quad hole
+    if (frozenBg) {
+      // 1. Draw live video first (full frame, mirrored)
+      drawVideo();
+      // 2. Draw frozen bg ON TOP — it has a transparent hole,
+      //    so live video shows through exactly where the frame was
+      ctx.drawImage(frozenBg, 0, 0);
+    }
+    // countdown handled by shot2Tick rAF, no hand detection needed
+    return;
   }
 
   if (handsData.length >= 2) {
