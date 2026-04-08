@@ -366,6 +366,13 @@ canvas.height    = CAM_H;
 resultCvs.width  = CAM_W;
 resultCvs.height = CAM_H;
 
+// ── Offscreen frame buffer ───────────────────────────────────
+// iOS Safari video element won't yield pixels when MediaPipe
+// Camera util drives it. We capture each frame here first.
+const frameBuf    = document.createElement('canvas');
+frameBuf.width    = CAM_W; frameBuf.height = CAM_H;
+const fbCtx       = frameBuf.getContext('2d');
+
 // ── Resize: canvas covers screen (object-fit:cover equivalent) ──
 function resizeAll() {
   const sw = window.innerWidth, sh = window.innerHeight;
@@ -412,7 +419,7 @@ function lm(hand, i) {
 function drawVideo() {
   ctx.save();
   ctx.translate(CAM_W, 0); ctx.scale(-1, 1);
-  ctx.drawImage(video, 0, 0, CAM_W, CAM_H);
+  ctx.drawImage(frameBuf, 0, 0, CAM_W, CAM_H);
   ctx.restore();
 }
 
@@ -549,9 +556,9 @@ function captureShot1(q, bb) {
   const tmp = document.createElement('canvas');
   tmp.width = CAM_W; tmp.height = CAM_H;
   const tc = tmp.getContext('2d');
-  // Draw mirrored video
+  // Draw mirrored frame from buffer
   tc.save(); tc.translate(CAM_W,0); tc.scale(-1,1);
-  tc.drawImage(video, 0, 0, CAM_W, CAM_H);
+  tc.drawImage(frameBuf, 0, 0, CAM_W, CAM_H);
   tc.restore();
   // Punch transparent hole where the frame is
   const pts = quadPts(q);
@@ -577,8 +584,9 @@ function captureShot2(q, bb) {
   const tmp = document.createElement('canvas');
   tmp.width = bb.w; tmp.height = bb.h;
   const tc = tmp.getContext('2d');
+  // Draw mirrored crop from buffer
   tc.save(); tc.translate(bb.w,0); tc.scale(-1,1);
-  tc.drawImage(video, bb.x, bb.y, bb.w, bb.h, 0, 0, bb.w, bb.h);
+  tc.drawImage(frameBuf, bb.x, bb.y, bb.w, bb.h, 0, 0, bb.w, bb.h);
   tc.restore();
   frozenFace = { img: tmp, bb };
   composeFinal(q, bb);
@@ -600,7 +608,7 @@ function composeFinal(q, bb) {
   rctx.drawImage(frozenFace.img, bb.x, bb.y, bb.w, bb.h);
   rctx.fillStyle = 'rgba(140,170,255,.06)'; rctx.fillRect(0,0,CAM_W,CAM_H);
   rctx.restore();
-  // Frame border
+  // Frame border only — no corner dots on final image
   rctx.save();
   rctx.beginPath();
   rctx.moveTo(pts[0].x, pts[0].y);
@@ -608,10 +616,6 @@ function composeFinal(q, bb) {
   rctx.closePath();
   rctx.shadowColor='rgba(200,225,255,.9)'; rctx.shadowBlur=12;
   rctx.strokeStyle='rgba(230,245,255,.85)'; rctx.lineWidth=2; rctx.stroke();
-  for (const p of pts) {
-    rctx.beginPath(); rctx.arc(p.x,p.y,5,0,Math.PI*2);
-    rctx.fillStyle='rgba(240,210,130,.9)'; rctx.shadowColor='rgba(240,210,130,.8)'; rctx.fill();
-  }
   rctx.restore();
   // Vignette
   const vg = rctx.createRadialGradient(CAM_W/2,CAM_H/2,CAM_H*.3,CAM_W/2,CAM_H/2,CAM_H*.85);
@@ -647,6 +651,9 @@ function downloadPhoto() {
 // ── Main MediaPipe render callback ───────────────────────────
 function onResults(results) {
   if (phase === 'save') return;
+
+  // Capture current frame to buffer FIRST (fixes iOS black rect)
+  fbCtx.drawImage(video, 0, 0, CAM_W, CAM_H);
 
   ctx.clearRect(0, 0, CAM_W, CAM_H);
   handsData = results.multiHandLandmarks || [];
