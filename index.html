@@ -33,6 +33,7 @@ radial-gradient(ellipse 50% 60% at 80% 70%, rgba(120,60,160,.14) 0%, transparent
 radial-gradient(ellipse 40% 40% at 60% 20%, rgba(40,100,200,.10) 0%, transparent 60%);
 }
 
+/* Animated grain */
 .intro-bg::after {
 content:’’; position:absolute; inset:-50%;
 width:200%; height:200%;
@@ -74,8 +75,10 @@ margin-top:-.5rem;
 font-style:italic;
 }
 
+/* Decorative lines */
 .intro-lines {
-position:absolute; inset:0; pointer-events:none; overflow:hidden;
+position:absolute; inset:0; pointer-events:none;
+overflow:hidden;
 }
 .intro-lines::before, .intro-lines::after {
 content:’’; position:absolute;
@@ -97,6 +100,7 @@ animation-delay:-3s;
 50%      { opacity:.8; transform:translate(-50%,-50%) scale(1.03); }
 }
 
+/* Corner marks */
 .mk { position:absolute; width:40px; height:40px; border-color:rgba(160,180,255,.18); border-style:solid; }
 .mk.tl { top:24px; left:24px; border-width:1px 0 0 1px; }
 .mk.tr { top:24px; right:24px; border-width:1px 1px 0 0; }
@@ -117,7 +121,8 @@ transition: border-color .3s, color .3s, background .3s;
 }
 .intro-btn::before {
 content:’’; position:absolute; inset:-5px;
-border:1px solid rgba(180,200,255,.06); border-radius:2px;
+border:1px solid rgba(180,200,255,.06);
+border-radius:2px;
 }
 .intro-btn:hover, .intro-btn:active {
 border-color:rgba(200,220,255,.7);
@@ -126,23 +131,21 @@ background:rgba(160,180,255,.06);
 }
 
 /* ═══════════════════════════════════════
-APP — FULLSCREEN CANVAS
+CAMERA PAGES (Shot1, Shot2)
 ═══════════════════════════════════════ */
 #app {
 position:fixed; inset:0; z-index:10;
 display:none;
+flex-direction:column; align-items:center; justify-content:center;
 }
-#app.active { display:block; }
+#app.active { display:flex; }
 
 #videoEl { position:absolute; opacity:0; pointer-events:none; }
 
-/* Canvas fills the full viewport — no letterboxing */
 #mainCanvas {
-position:absolute; inset:0;
-width:100%; height:100%;
 display:block;
+max-width:100vw; max-height:100vh;
 touch-action:none;
-object-fit:cover;
 }
 
 /* HUD */
@@ -158,8 +161,10 @@ font-size:.9rem; letter-spacing:.2em;
 color:rgba(180,200,255,.6);
 }
 .hud-phase {
-font-family:‘Cormorant Garamond’,serif; font-style:italic;
-font-size:.7rem; letter-spacing:.2em; color:rgba(180,200,255,.4);
+font-family:‘Cormorant Garamond’,serif;
+font-style:italic;
+font-size:.7rem; letter-spacing:.2em;
+color:rgba(180,200,255,.4);
 }
 
 /* Bottom bar */
@@ -188,7 +193,7 @@ pointer-events:none; z-index:900; transition:opacity .05s;
 }
 #flash.go { opacity:.55; }
 
-/* Timer label */
+/* Timer ring - drawn on canvas, but overlay label */
 #timerLabel {
 position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
 font-family:‘Bebas Neue’,sans-serif; font-size:3.5rem;
@@ -218,6 +223,7 @@ position:fixed; inset:0; z-index:500;
 display:none; flex-direction:column;
 align-items:center; justify-content:center;
 background:#080810;
+transition:opacity .5s;
 }
 #savePage.active { display:flex; }
 
@@ -229,11 +235,8 @@ radial-gradient(ellipse 40% 50% at 75% 30%, rgba(100,50,140,.10) 0%, transparent
 }
 
 #resultCanvas {
-position:relative; z-index:1;
-/* Fit inside viewport with padding, keep 4:3 */
 max-width: min(90vw, 90vh * 1.333);
 max-height: min(90vh, 90vw * 0.75);
-width: auto; height: auto;
 border:1px solid rgba(160,180,255,.12);
 border-radius:1px;
 box-shadow: 0 0 60px rgba(100,120,200,.12), 0 0 120px rgba(80,80,160,.08);
@@ -241,7 +244,6 @@ display:block;
 }
 
 .save-actions {
-position:relative; z-index:1;
 display:flex; gap:12px; margin-top:20px;
 }
 .save-btn {
@@ -260,32 +262,39 @@ border-color:rgba(180,200,255,.5);
 color:rgba(220,235,255,.9);
 }
 .save-note {
-position:relative; z-index:1;
 font-family:‘Cormorant Garamond’,serif; font-style:italic;
 font-size:.65rem; letter-spacing:.15em;
-color:rgba(160,180,255,.3); margin-top:12px;
+color:rgba(160,180,255,.3);
+margin-top:12px;
 }
 </style>
 
 </head>
 <body>
 
+<!-- ── FLASH ── -->
+
 <div id="flash"></div>
 <div id="timerLabel"></div>
 
-<!-- INTRO -->
+<!-- ══════════════════════════════
+     INTRO
+══════════════════════════════ -->
 
 <div id="intro">
   <div class="intro-bg"></div>
   <div class="intro-lines"></div>
   <div class="mk tl"></div><div class="mk tr"></div>
   <div class="mk bl"></div><div class="mk br"></div>
+
   <div class="intro-logo">FOTOGRAM</div>
   <div class="intro-sub">love</div>
   <button class="intro-btn" onclick="startApp()">Bắt đầu</button>
 </div>
 
-<!-- APP -->
+<!-- ══════════════════════════════
+     APP (camera)
+══════════════════════════════ -->
 
 <div id="app">
   <video id="videoEl" playsinline autoplay muted webkit-playsinline></video>
@@ -301,7 +310,9 @@ color:rgba(160,180,255,.3); margin-top:12px;
   </div>
 </div>
 
-<!-- SAVE -->
+<!-- ══════════════════════════════
+     SAVE PAGE
+══════════════════════════════ -->
 
 <div id="savePage">
   <div class="save-bg"></div>
@@ -310,16 +321,20 @@ color:rgba(160,180,255,.3); margin-top:12px;
     <button class="save-btn" onclick="resetAll()">↺ Chụp lại</button>
     <button class="save-btn primary" onclick="downloadPhoto()">↓ Lưu ảnh</button>
   </div>
-  <div class="save-note">Shot 2 tự động chụp sau 4 giây</div>
+  <div class="save-note">Giữ ngón tay → tự chụp sau 3 giây</div>
 </div>
 
-<!-- ERROR -->
+<!-- ══════════════════════════════
+     ERROR
+══════════════════════════════ -->
 
-<div id="errBox">
+<div id="errBox" id="errBox">
   <h2>CAMERA ERROR</h2>
   <p id="errMsg"></p>
   <button class="intro-btn" style="margin-top:8px" onclick="retryCamera()">Thử lại</button>
 </div>
+
+<!-- MediaPipe -->
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 
@@ -329,71 +344,84 @@ color:rgba(160,180,255,.3); margin-top:12px;
 // ══════════════════════════════════════════════
 //  ELEMENTS
 // ══════════════════════════════════════════════
-const video      = document.getElementById('videoEl');
-const canvas     = document.getElementById('mainCanvas');
-const ctx        = canvas.getContext('2d');
-const resultCvs  = document.getElementById('resultCanvas');
-const rctx       = resultCvs.getContext('2d');
-const flash      = document.getElementById('flash');
-const timerLbl   = document.getElementById('timerLabel');
-const phaseLabel = document.getElementById('phaseLabel');
+const video       = document.getElementById('videoEl');
+const canvas      = document.getElementById('mainCanvas');
+const ctx         = canvas.getContext('2d');
+const resultCvs   = document.getElementById('resultCanvas');
+const rctx        = resultCvs.getContext('2d');
+const flash       = document.getElementById('flash');
+const timerLbl    = document.getElementById('timerLabel');
+const phaseLabel  = document.getElementById('phaseLabel');
 
-// ══════════════════════════════════════════════
-//  INTERNAL RESOLUTION
-//  We render at full viewport size dynamically
-// ══════════════════════════════════════════════
-let VW = window.innerWidth;
-let VH = window.innerHeight;
-
-// resultCanvas stays at 640×480 for the saved image
-const OUT_W = 640, OUT_H = 480;
-resultCvs.width  = OUT_W;
-resultCvs.height = OUT_H;
-
-function syncCanvasSize() {
-  VW = window.innerWidth;
-  VH = window.innerHeight;
-  canvas.width  = VW;
-  canvas.height = VH;
-}
-syncCanvasSize();
-window.addEventListener('resize', syncCanvasSize);
-window.addEventListener('orientationchange', () => setTimeout(syncCanvasSize, 300));
+// Internal resolution
+const W = 640, H = 480;
+canvas.width  = W; canvas.height = H;
+resultCvs.width = W; resultCvs.height = H;
 
 // ══════════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════════
-let phase       = 'shot1';
-let handsData   = [];
+/*
+  PHASES:
+  'shot1' → user creates frame with hands → outside frozen after 3s stable
+  'shot2' → frame still shown → inside captured after 3s stable
+  'save'  → show result
+*/
+let phase          = 'shot1';
+let handsData      = [];
+let animT          = 0;
 
-let frozenBg    = null;   // canvas: outside the frame (shot1)
-let frozenRect  = null;   // saved rect from shot1 (in VW×VH coords)
-let shot1Done   = false;
-let shot2Done   = false;
+// Shot1 state
+let frozenBg       = null;   // ImageData of background (outside frame)
+let shot1Done      = false;
 
-// Shot 2 auto-timer (no hands needed)
-const SHOT2_DELAY = 4000;
-let shot2StartTime = null;  // timestamp when shot2 phase began
+// Shot2 state  
+let frozenFace     = null;   // canvas with the face region
+let shot2Done      = false;
 
-// Shot 1 stability
-const STABLE_DELAY = 3000;
-let stableMs      = 0;
-let lastFrameRect = null;
-let lastFrameTime = 0;
+// Timer state
+let stableMs       = 0;      // milliseconds frame has been stable
+let lastFrameRect  = null;   // {x,y,w,h}
+let lastFrameTime  = 0;
+const STABLE_DELAY = 3000;   // 3 seconds
 
-// Smoothing
-const SMOOTH_N  = 8;
-let rectBuffer  = [];
+// Smoothing buffer for frame rect (reduce jitter)
+const SMOOTH_N = 8;
+let rectBuffer = [];
+
+// ══════════════════════════════════════════════
+//  RESIZE
+// ══════════════════════════════════════════════
+function resizeCanvas() {
+  const sw = window.innerWidth, sh = window.innerHeight;
+  const ar = W / H;
+  const sar = sw / sh;
+  let dw, dh;
+  if (sar > ar) { dh = sh; dw = sh * ar; }
+  else          { dw = sw; dh = sw / ar; }
+  canvas.style.width  = dw + 'px';
+  canvas.style.height = dh + 'px';
+
+  const rw = Math.min(sw * .9, sh * .9 * ar);
+  resultCvs.style.width  = rw + 'px';
+  resultCvs.style.height = (rw / ar) + 'px';
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 300));
 
 // ══════════════════════════════════════════════
 //  LANDMARK HELPERS
-//  Convert MediaPipe normalized coords → canvas px
 // ══════════════════════════════════════════════
+// MediaPipe Hands landmark indices
+// 4 = thumb tip, 8 = index finger tip
 function lm(hand, idx) {
+  // Note: MediaPipe gives x,y normalized 0-1
+  // When we mirror the canvas, we need to also mirror x
   const raw = hand[idx];
   return {
-    x: (1 - raw.x) * VW,   // mirror X
-    y: raw.y * VH
+    x: (1 - raw.x) * W,  // mirror X
+    y: raw.y * H
   };
 }
 
@@ -401,25 +429,31 @@ function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
 
 // ══════════════════════════════════════════════
 //  GET FRAME RECT FROM 2 HANDS
-//  Corners = index finger tips (landmark 8) of each hand
 // ══════════════════════════════════════════════
 function getFrameRect(hands) {
   if (hands.length < 2) return null;
 
-  // Index finger tip = landmark 8 of each hand
-  const c1 = lm(hands[0], 8);
-  const c2 = lm(hands[1], 8);
+  // Use thumb tip (4) and index tip (8) of each hand
+  // Corner of frame = midpoint between thumb & index of each hand
+  const h0_thumb = lm(hands[0], 4);
+  const h0_index = lm(hands[0], 8);
+  const h1_thumb = lm(hands[1], 4);
+  const h1_index = lm(hands[1], 8);
 
-  const x = Math.min(c1.x, c2.x);
-  const y = Math.min(c1.y, c2.y);
-  const w = Math.abs(c2.x - c1.x);
-  const h = Math.abs(c2.y - c1.y);
+  const c1 = { x: (h0_thumb.x + h0_index.x) / 2, y: (h0_thumb.y + h0_index.y) / 2 };
+  const c2 = { x: (h1_thumb.x + h1_index.x) / 2, y: (h1_thumb.y + h1_index.y) / 2 };
 
-  return { x, y, w, h, c1, c2 };
+  return {
+    x: Math.min(c1.x, c2.x),
+    y: Math.min(c1.y, c2.y),
+    w: Math.abs(c2.x - c1.x),
+    h: Math.abs(c2.y - c1.y),
+    c1, c2
+  };
 }
 
 // ══════════════════════════════════════════════
-//  SMOOTH RECT
+//  SMOOTH RECT BUFFER
 // ══════════════════════════════════════════════
 function smoothRect(r) {
   rectBuffer.push(r);
@@ -434,7 +468,7 @@ function smoothRect(r) {
 }
 
 // ══════════════════════════════════════════════
-//  STABILITY CHECK
+//  CHECK STABILITY
 // ══════════════════════════════════════════════
 function isStable(rect) {
   if (!lastFrameRect) return false;
@@ -442,11 +476,11 @@ function isStable(rect) {
               + Math.abs(rect.y - lastFrameRect.y)
               + Math.abs(rect.w - lastFrameRect.w)
               + Math.abs(rect.h - lastFrameRect.h);
-  return delta < 20;
+  return delta < 20; // pixels total movement threshold
 }
 
 // ══════════════════════════════════════════════
-//  FLASH
+//  FLASH EFFECT
 // ══════════════════════════════════════════════
 function doFlash() {
   flash.classList.add('go');
@@ -454,91 +488,70 @@ function doFlash() {
 }
 
 // ══════════════════════════════════════════════
-//  SHOT 1 — freeze outside
+//  SHOT 1 CAPTURE — freeze OUTSIDE the frame
 // ══════════════════════════════════════════════
 function captureShot1(rect) {
   doFlash();
 
-  // Render full mirrored video to a VW×VH offscreen canvas
+  // Draw full mirrored video to a temp canvas
   const tmp = document.createElement('canvas');
-  tmp.width = VW; tmp.height = VH;
+  tmp.width = W; tmp.height = H;
   const tc = tmp.getContext('2d');
-  tc.translate(VW, 0); tc.scale(-1, 1);
-  tc.drawImage(video, 0, 0, VW, VH);
+  tc.translate(W, 0); tc.scale(-1, 1);
+  tc.drawImage(video, 0, 0, W, H);
 
-  // Punch hole where the frame is
+  // Punch a transparent hole where the frame is
   tc.clearRect(rect.x, rect.y, rect.w, rect.h);
 
-  frozenBg   = tmp;
-  frozenRect = { ...rect };   // save rect in viewport coords
-  shot1Done  = true;
-  phase      = 'shot2';
-
-  // Start shot2 auto-timer
-  shot2StartTime = Date.now();
-
+  frozenBg = tmp; // store the canvas (outside only)
+  shot1Done = true;
+  phase = 'shot2';
   stableMs = 0; lastFrameRect = null; rectBuffer = [];
-  phaseLabel.textContent = 'Giữ nguyên — tự chụp sau 4s';
+  phaseLabel.textContent = 'Giữ khung — shot 2';
 }
 
 // ══════════════════════════════════════════════
-//  SHOT 2 — capture inside, compose final
+//  SHOT 2 CAPTURE — freeze INSIDE the frame
 // ══════════════════════════════════════════════
-function captureShot2() {
+function captureShot2(rect) {
   doFlash();
-  const rect = frozenRect;   // always use saved rect from shot1
 
-  // Scale factors: viewport → output canvas
-  const sx = OUT_W / VW;
-  const sy = OUT_H / VH;
+  // Capture just the face area (inner frame)
+  const tmp = document.createElement('canvas');
+  tmp.width = rect.w; tmp.height = rect.h;
+  const tc = tmp.getContext('2d');
+  tc.translate(rect.w, 0); tc.scale(-1, 1);
+  tc.drawImage(video, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w, rect.h);
 
-  // Map rect to output coords
-  const or = {
-    x: rect.x * sx,
-    y: rect.y * sy,
-    w: rect.w * sx,
-    h: rect.h * sy,
-  };
-
-  // Capture face: crop from live video, scaled to output
-  const faceCvs = document.createElement('canvas');
-  faceCvs.width = or.w; faceCvs.height = or.h;
-  const fc = faceCvs.getContext('2d');
-  // Mirror the video crop
-  fc.translate(or.w, 0); fc.scale(-1, 1);
-  fc.drawImage(video, rect.x / VW * video.videoWidth, rect.y / VH * video.videoHeight,
-               rect.w / VW * video.videoWidth, rect.h / VH * video.videoHeight,
-               0, 0, or.w, or.h);
-
+  frozenFace = { img: tmp, rect };
   shot2Done = true;
-  composeFinal(or, faceCvs);
+
+  // Compose final result
+  composeFinal(rect);
   showSavePage();
 }
 
 // ══════════════════════════════════════════════
-//  COMPOSE FINAL (output 640×480)
+//  COMPOSE FINAL IMAGE
 // ══════════════════════════════════════════════
-function composeFinal(or, faceCvs) {
-  const sx = OUT_W / VW;
-  const sy = OUT_H / VH;
+function composeFinal(rect) {
+  // 1. Draw frozen bg (outside frame)
+  rctx.clearRect(0, 0, W, H);
+  rctx.drawImage(frozenBg, 0, 0);
 
-  // 1. Draw frozen bg scaled to output size
-  rctx.clearRect(0, 0, OUT_W, OUT_H);
-  rctx.drawImage(frozenBg, 0, 0, OUT_W, OUT_H);
+  // 2. Draw frozen face inside frame
+  rctx.drawImage(frozenFace.img, rect.x, rect.y, rect.w, rect.h);
 
-  // 2. Draw face inside frame
-  rctx.drawImage(faceCvs, or.x, or.y, or.w, or.h);
-
-  // 3. Glass border
+  // 3. Draw glass border on the frame
   rctx.save();
   rctx.shadowColor = 'rgba(200,225,255,.9)';
   rctx.shadowBlur  = 12;
   rctx.strokeStyle = 'rgba(230,245,255,.85)';
   rctx.lineWidth   = 1.5;
-  rctx.strokeRect(or.x, or.y, or.w, or.h);
+  rctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
 
   // Corner dots
-  [[or.x,or.y],[or.x+or.w,or.y],[or.x,or.y+or.h],[or.x+or.w,or.y+or.h]]
+  [[rect.x,rect.y],[rect.x+rect.w,rect.y],[rect.x,rect.y+rect.h],[rect.x+rect.w,rect.y+rect.h]]
     .forEach(([cx,cy]) => {
       rctx.beginPath(); rctx.arc(cx, cy, 4, 0, Math.PI*2);
       rctx.fillStyle = 'rgba(240,210,130,.9)';
@@ -546,21 +559,21 @@ function composeFinal(or, faceCvs) {
       rctx.fill();
     });
 
-  // Glass tint
+  // Glass tint overlay inside frame
   rctx.fillStyle = 'rgba(140,170,255,.07)';
-  rctx.fillRect(or.x, or.y, or.w, or.h);
+  rctx.fillRect(rect.x, rect.y, rect.w, rect.h);
   rctx.restore();
 
-  // 4. Vignette
-  const vg = rctx.createRadialGradient(OUT_W/2,OUT_H/2,OUT_H*.3,OUT_W/2,OUT_H/2,OUT_H*.8);
+  // 4. Subtle vignette
+  const vg = rctx.createRadialGradient(W/2,H/2,H*.3,W/2,H/2,H*.8);
   vg.addColorStop(0,'transparent');
   vg.addColorStop(1,'rgba(4,4,12,.45)');
   rctx.fillStyle = vg;
-  rctx.fillRect(0,0,OUT_W,OUT_H);
+  rctx.fillRect(0,0,W,H);
 }
 
 // ══════════════════════════════════════════════
-//  PAGES
+//  SHOW/HIDE PAGES
 // ══════════════════════════════════════════════
 function showSavePage() {
   phase = 'save';
@@ -568,11 +581,10 @@ function showSavePage() {
 }
 
 function resetAll() {
-  phase          = 'shot1';
-  frozenBg       = null; frozenRect = null;
-  shot1Done      = false; shot2Done  = false;
-  shot2StartTime = null;
-  stableMs = 0; lastFrameRect = null; rectBuffer = [];
+  phase      = 'shot1';
+  frozenBg   = null; frozenFace = null;
+  shot1Done  = false; shot2Done  = false;
+  stableMs   = 0; lastFrameRect = null; rectBuffer = [];
   timerLbl.classList.remove('show');
   phaseLabel.textContent = 'Tạo khung — shot 1';
   document.getElementById('savePage').classList.remove('active');
@@ -586,43 +598,46 @@ function downloadPhoto() {
 }
 
 // ══════════════════════════════════════════════
-//  DRAW HAND DOTS
+//  DRAW HAND DOTS (debug / visual feedback)
 // ══════════════════════════════════════════════
 function drawHandDots(hands) {
   hands.forEach(hand => {
-    // Show index tip (8) prominently — this is the corner
-    const tip = lm(hand, 8);
+    [4, 8].forEach(idx => {
+      const p = lm(hand, idx);
+      ctx.save();
+      ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI*2);
+      ctx.fillStyle = idx === 4 ? 'rgba(240,210,130,.85)' : 'rgba(180,220,255,.85)';
+      ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 10;
+      ctx.fill(); ctx.restore();
+    });
+
+    // Line between thumb and index
+    const t = lm(hand, 4), i = lm(hand, 8);
     ctx.save();
-    ctx.beginPath(); ctx.arc(tip.x, tip.y, 7, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(240,210,130,.9)';
-    ctx.shadowColor = 'rgba(240,210,130,.8)'; ctx.shadowBlur = 14;
-    ctx.fill();
-    // Small ring
-    ctx.beginPath(); ctx.arc(tip.x, tip.y, 11, 0, Math.PI*2);
-    ctx.strokeStyle = 'rgba(240,210,130,.3)'; ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.restore();
+    ctx.beginPath(); ctx.moveTo(t.x, t.y); ctx.lineTo(i.x, i.y);
+    ctx.strokeStyle = 'rgba(200,220,255,.25)'; ctx.lineWidth = 1;
+    ctx.stroke(); ctx.restore();
   });
 }
 
 // ══════════════════════════════════════════════
-//  DRAW FRAME RECT ON CANVAS
+//  DRAW FRAME
 // ══════════════════════════════════════════════
 function drawFrameRect(rect, progress) {
-  // Live preview clipped inside
+  // Clip preview inside frame
   ctx.save();
   ctx.beginPath(); ctx.rect(rect.x, rect.y, rect.w, rect.h); ctx.clip();
-  ctx.translate(VW, 0); ctx.scale(-1, 1);
-  ctx.drawImage(video, 0, 0, VW, VH);
+  ctx.translate(W, 0); ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0, W, H);
   ctx.restore();
 
   // Glass tint
   ctx.save();
-  ctx.fillStyle = 'rgba(120,160,255,.08)';
-  ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+  ctx.beginPath(); ctx.rect(rect.x, rect.y, rect.w, rect.h); ctx.clip();
+  ctx.fillStyle = 'rgba(120,160,255,.08)'; ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
   ctx.restore();
 
-  // Border glow
+  // Border
   ctx.save();
   ctx.shadowColor = 'rgba(180,220,255,.9)'; ctx.shadowBlur = 14;
   ctx.strokeStyle = `rgba(225,242,255,${.5 + progress * .4})`;
@@ -633,13 +648,12 @@ function drawFrameRect(rect, progress) {
   [[rect.x,rect.y],[rect.x+rect.w,rect.y],[rect.x,rect.y+rect.h],[rect.x+rect.w,rect.y+rect.h]]
     .forEach(([cx,cy]) => {
       ctx.beginPath(); ctx.arc(cx, cy, 3.5, 0, Math.PI*2);
-      ctx.fillStyle = 'rgba(240,210,130,.9)';
-      ctx.shadowColor = 'rgba(240,210,130,.8)';
+      ctx.fillStyle = 'rgba(240,210,130,.9)'; ctx.shadowColor = 'rgba(240,210,130,.8)';
       ctx.fill();
     });
   ctx.restore();
 
-  // Progress arc ring around frame
+  // Progress arc (timer ring) around frame center
   if (progress > 0) {
     const cx = rect.x + rect.w / 2, cy = rect.y + rect.h / 2;
     const rad = Math.min(rect.w, rect.h) * 0.48;
@@ -656,91 +670,35 @@ function drawFrameRect(rect, progress) {
 //  MAIN RENDER
 // ══════════════════════════════════════════════
 function render(results) {
+  animT += .018;
   const now = Date.now();
-  ctx.clearRect(0, 0, VW, VH);
+
+  ctx.clearRect(0, 0, W, H);
 
   if (phase === 'save') return;
 
-  // ── SHOT 2: auto-timer (no hands needed) ──
-  if (phase === 'shot2') {
-    // Draw frozen bg
-    if (frozenBg) ctx.drawImage(frozenBg, 0, 0, VW, VH);
+  // ── Draw base video ──
+  if (phase === 'shot1') {
+    // Normal mirrored video
+    ctx.save();
+    ctx.translate(W, 0); ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0, W, H);
+    ctx.restore();
+    ctx.fillStyle = 'rgba(5,5,14,.3)'; ctx.fillRect(0,0,W,H);
 
-    // Draw live video inside frozen rect
-    const rect = frozenRect;
-    if (rect) {
-      ctx.save();
-      ctx.beginPath(); ctx.rect(rect.x, rect.y, rect.w, rect.h); ctx.clip();
-      ctx.translate(VW, 0); ctx.scale(-1, 1);
-      ctx.drawImage(video, 0, 0, VW, VH);
-      ctx.restore();
-
-      // Glass tint inside
-      ctx.fillStyle = 'rgba(120,160,255,.06)';
-      ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
-
-      // Border stays visible
-      ctx.save();
-      ctx.shadowColor = 'rgba(180,220,255,.7)'; ctx.shadowBlur = 10;
-      ctx.strokeStyle = 'rgba(225,242,255,.75)';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-      [[rect.x,rect.y],[rect.x+rect.w,rect.y],[rect.x,rect.y+rect.h],[rect.x+rect.w,rect.y+rect.h]]
-        .forEach(([cx,cy]) => {
-          ctx.beginPath(); ctx.arc(cx, cy, 3.5, 0, Math.PI*2);
-          ctx.fillStyle = 'rgba(240,210,130,.9)';
-          ctx.shadowColor = 'rgba(240,210,130,.8)'; ctx.fill();
-        });
-      ctx.restore();
-
-      // Auto-timer progress
-      const elapsed = now - shot2StartTime;
-      const progress = Math.min(elapsed / SHOT2_DELAY, 1);
-
-      // Arc ring
-      const cx = rect.x + rect.w / 2, cy = rect.y + rect.h / 2;
-      const rad = Math.min(rect.w, rect.h) * 0.48;
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(cx, cy, rad, -Math.PI/2, -Math.PI/2 + progress * Math.PI * 2);
-      ctx.strokeStyle = `rgba(240,210,130,${.4 + progress * .5})`;
-      ctx.lineWidth = 2; ctx.shadowColor = 'rgba(240,210,130,.7)'; ctx.shadowBlur = 12;
-      ctx.stroke(); ctx.restore();
-
-      // Countdown label
-      const remaining = Math.ceil((SHOT2_DELAY - elapsed) / 1000);
-      if (elapsed > 300 && remaining > 0) {
-        timerLbl.textContent = remaining;
-        timerLbl.classList.add('show');
-      } else if (remaining <= 0) {
-        timerLbl.textContent = '✦';
-        timerLbl.classList.add('show');
-      }
-
-      // Trigger capture
-      if (progress >= 1) {
-        timerLbl.classList.remove('show');
-        captureShot2();
-      }
-    }
-
-    phaseLabel.textContent = 'Shot 2 — tự động...';
-    return;
+  } else if (phase === 'shot2') {
+    // Draw frozen background (outside)
+    if (frozenBg) ctx.drawImage(frozenBg, 0, 0);
+    // Live video only inside frame (drawn in drawFrameRect)
   }
 
-  // ── SHOT 1: normal mirrored video ──
-  ctx.save();
-  ctx.translate(VW, 0); ctx.scale(-1, 1);
-  ctx.drawImage(video, 0, 0, VW, VH);
-  ctx.restore();
-  ctx.fillStyle = 'rgba(5,5,14,.25)'; ctx.fillRect(0,0,VW,VH);
-
+  // ── Get hands ──
   handsData = (results.multiHandLandmarks && results.multiHandLandmarks.length > 0)
     ? results.multiHandLandmarks : [];
 
   if (handsData.length >= 2) {
     const rawRect = getFrameRect(handsData);
-    if (!rawRect || rawRect.w < 40 || rawRect.h < 40) {
+    if (!rawRect || rawRect.w < 30 || rawRect.h < 30) {
       stableMs = 0; lastFrameRect = null;
       drawHandDots(handsData);
       return;
@@ -748,9 +706,7 @@ function render(results) {
 
     const rect = smoothRect(rawRect);
 
-    // Fix: init lastFrameTime on first valid frame
-    if (!lastFrameTime) lastFrameTime = now;
-
+    // Check stability
     const stable = isStable(rect);
     if (stable) {
       stableMs += (now - lastFrameTime);
@@ -762,10 +718,13 @@ function render(results) {
 
     const progress = Math.min(stableMs / STABLE_DELAY, 1);
 
+    // Draw the frame
     drawFrameRect(rect, progress);
+
+    // Draw hand dots
     drawHandDots(handsData);
 
-    // Timer countdown
+    // Timer label (countdown)
     if (stableMs > 300) {
       const remaining = Math.ceil((STABLE_DELAY - stableMs) / 1000);
       timerLbl.textContent = remaining > 0 ? remaining : '✦';
@@ -774,43 +733,51 @@ function render(results) {
       timerLbl.classList.remove('show');
     }
 
-    // Auto capture
+    // Auto capture at 100%
     if (progress >= 1) {
       timerLbl.classList.remove('show');
       stableMs = 0; lastFrameRect = null; rectBuffer = [];
-      captureShot1(rect);
+      if (phase === 'shot1') captureShot1(rect);
+      else if (phase === 'shot2') captureShot2(rect);
     }
 
-    phaseLabel.textContent = 'Giữ yên → 3s';
-
   } else {
-    stableMs = 0; lastFrameRect = null; lastFrameTime = 0;
+    // No 2 hands
+    stableMs = 0; lastFrameRect = null;
     timerLbl.classList.remove('show');
 
     if (handsData.length === 1) {
       drawHandDots(handsData);
-      const t = lm(handsData[0], 8);
-      // show a dot only
+      // Show 1-hand dashed hint
+      const t = lm(handsData[0], 4), i = lm(handsData[0], 8);
+      ctx.save();
+      ctx.setLineDash([5,5]); ctx.strokeStyle = 'rgba(180,210,255,.3)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(Math.min(t.x,i.x), Math.min(t.y,i.y), Math.abs(i.x-t.x), Math.abs(i.y-t.y));
+      ctx.restore();
     }
 
     // Idle scan line
-    const sy = ((now / 14) % VH);
+    const sy = ((now / 14) % H);
     ctx.strokeStyle = 'rgba(160,190,255,.06)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(0,sy); ctx.lineTo(VW,sy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,sy); ctx.lineTo(W,sy); ctx.stroke();
 
-    // Hint text
+    // Phase hint text on canvas
+    const msg = phase === 'shot1' ? 'Đưa 2 tay vào — tạo khung' : 'Đưa tay vào lại — chụp mặt';
     ctx.font = '500 13px Cormorant Garamond, serif';
     ctx.fillStyle = 'rgba(180,200,255,.35)';
     ctx.textAlign = 'center';
-    ctx.fillText('Đưa 2 tay vào — tạo khung bằng ngón trỏ', VW/2, VH - 18);
+    ctx.fillText(msg, W/2, H - 18);
     ctx.textAlign = 'left';
-
-    phaseLabel.textContent = 'Shot 1 — tạo khung';
   }
+
+  // Phase label update
+  if (phase === 'shot1') phaseLabel.textContent = handsData.length >= 2 ? 'Giữ yên → 3s' : 'Shot 1 — tạo khung';
+  else if (phase === 'shot2') phaseLabel.textContent = handsData.length >= 2 ? 'Giữ yên → 3s' : 'Shot 2 — chụp mặt';
 }
 
 // ══════════════════════════════════════════════
-//  INIT
+//  START
 // ══════════════════════════════════════════════
 async function retryCamera() {
   document.getElementById('errBox').classList.remove('show');
@@ -821,7 +788,7 @@ async function initMediaPipe() {
   phaseLabel.textContent = 'Loading...';
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode:'user', width:{ideal:1280}, height:{ideal:720} },
+      video: { facingMode:'user', width:{ideal:640}, height:{ideal:480} },
       audio: false
     }).catch(() => navigator.mediaDevices.getUserMedia({ video:{facingMode:'user'}, audio:false }));
 
@@ -848,7 +815,7 @@ async function initMediaPipe() {
 
   const cam = new Camera(video, {
     onFrame: async () => { await hands.send({ image: video }); },
-    width: VW, height: VH
+    width: W, height: H
   });
   await cam.start();
 
