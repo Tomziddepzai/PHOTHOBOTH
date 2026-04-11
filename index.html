@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -11,69 +12,69 @@
 
 /* ── Reset ── */
 *, *::before, *::after {
-  margin: 0; padding: 0; box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+margin: 0; padding: 0; box-sizing: border-box;
+-webkit-tap-highlight-color: transparent;
 }
 html, body {
-  width: 100%; height: 100%;
-  overflow: hidden;
-  background: #080810;
-  /* NO touch-action:none on body — kills button clicks on iOS */
+width: 100%; height: 100%;
+overflow: hidden;
+background: #080810;
+/* NO touch-action:none on body — kills button clicks on iOS */
 }
 
 /* ════════════════════════════════
-   INTRO
+INTRO
 ════════════════════════════════ */
 #intro {
-  position: fixed; inset: 0; z-index: 100;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  background: #080810;
-  transition: opacity .7s ease;
-  /* pointer-events controlled via JS, not visibility trick */
+position: fixed; inset: 0; z-index: 100;
+display: flex; flex-direction: column;
+align-items: center; justify-content: center;
+background: #080810;
+transition: opacity .7s ease;
+/* pointer-events controlled via JS, not visibility trick */
 }
 #intro.out { opacity: 0; pointer-events: none; }
 
 /* decorative layers — pointer-events:none so they never block button */
 .intro-bg {
-  position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 60% 50% at 20% 30%, rgba(60,80,180,.18) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 60% at 80% 70%, rgba(120,60,160,.14) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 40% at 60% 20%, rgba(40,100,200,.10) 0%, transparent 60%);
+position: absolute; inset: 0; pointer-events: none;
+background:
+radial-gradient(ellipse 60% 50% at 20% 30%, rgba(60,80,180,.18) 0%, transparent 70%),
+radial-gradient(ellipse 50% 60% at 80% 70%, rgba(120,60,160,.14) 0%, transparent 70%),
+radial-gradient(ellipse 40% 40% at 60% 20%, rgba(40,100,200,.10) 0%, transparent 60%);
 }
 .intro-bg::after {
-  content: ''; position: absolute; inset: -50%; width: 200%; height: 200%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-  opacity: .03; animation: grain 1.2s steps(2) infinite;
+content: ‘’; position: absolute; inset: -50%; width: 200%; height: 200%;
+background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 512 512’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘n’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.75’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23n)’ opacity=‘1’/%3E%3C/svg%3E”);
+opacity: .03; animation: grain 1.2s steps(2) infinite;
 }
 @keyframes grain {
-  0%   { transform: translate(0, 0); }
-  25%  { transform: translate(-2%, -3%); }
-  50%  { transform: translate(3%, 1%); }
-  75%  { transform: translate(-1%, 3%); }
-  100% { transform: translate(2%, -1%); }
+0%   { transform: translate(0, 0); }
+25%  { transform: translate(-2%, -3%); }
+50%  { transform: translate(3%, 1%); }
+75%  { transform: translate(-1%, 3%); }
+100% { transform: translate(2%, -1%); }
 }
 .intro-circles {
-  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+position: absolute; inset: 0; pointer-events: none; overflow: hidden;
 }
 .intro-circles::before, .intro-circles::after {
-  content: ''; position: absolute;
-  border: 1px solid rgba(160,180,255,.07); border-radius: 50%;
-  top: 50%; left: 50%;
-  animation: breathe 6s ease-in-out infinite;
+content: ‘’; position: absolute;
+border: 1px solid rgba(160,180,255,.07); border-radius: 50%;
+top: 50%; left: 50%;
+animation: breathe 6s ease-in-out infinite;
 }
 .intro-circles::before { width: 70vmax; height: 70vmax; transform: translate(-50%,-50%); }
 .intro-circles::after  { width: 50vmax; height: 50vmax; transform: translate(-50%,-50%); animation-delay: -3s; }
 @keyframes breathe {
-  0%, 100% { opacity: .4; transform: translate(-50%,-50%) scale(1); }
-  50%       { opacity: .8; transform: translate(-50%,-50%) scale(1.04); }
+0%, 100% { opacity: .4; transform: translate(-50%,-50%) scale(1); }
+50%       { opacity: .8; transform: translate(-50%,-50%) scale(1.04); }
 }
 /* corner marks — pointer-events:none */
 .mk {
-  position: absolute; width: 36px; height: 36px;
-  border-color: rgba(160,180,255,.18); border-style: solid;
-  pointer-events: none;
+position: absolute; width: 36px; height: 36px;
+border-color: rgba(160,180,255,.18); border-style: solid;
+pointer-events: none;
 }
 .mk.tl { top: 20px; left: 20px; border-width: 1px 0 0 1px; }
 .mk.tr { top: 20px; right: 20px; border-width: 1px 1px 0 0; }
@@ -82,203 +83,254 @@ html, body {
 
 /* content — sits above decorative layers, receives touch */
 .intro-content {
-  position: relative; z-index: 2;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 0;
+position: relative; z-index: 2;
+display: flex; flex-direction: column;
+align-items: center; justify-content: center;
+gap: 0;
 }
 .intro-logo {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(3rem, 11vw, 8rem);
-  letter-spacing: .1em;
-  color: transparent;
-  background: linear-gradient(135deg, #c8d8ff 0%, #8090c8 40%, #e8d0a0 70%, #c8d8ff 100%);
-  -webkit-background-clip: text; background-clip: text;
-  background-size: 200% 200%;
-  animation: shimmer 4s ease-in-out infinite;
-  line-height: 1; white-space: nowrap;
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: clamp(3rem, 11vw, 8rem);
+letter-spacing: .1em;
+color: transparent;
+background: linear-gradient(135deg, #c8d8ff 0%, #8090c8 40%, #e8d0a0 70%, #c8d8ff 100%);
+-webkit-background-clip: text; background-clip: text;
+background-size: 200% 200%;
+animation: shimmer 4s ease-in-out infinite;
+line-height: 1; white-space: nowrap;
 }
 @keyframes shimmer {
-  0%, 100% { background-position: 0% 50%; }
-  50%       { background-position: 100% 50%; }
+0%, 100% { background-position: 0% 50%; }
+50%       { background-position: 100% 50%; }
 }
 .intro-sub {
-  font-family: 'Cormorant Garamond', serif; font-style: italic;
-  font-size: clamp(.85rem, 3vw, 1rem);
-  letter-spacing: .45em; text-transform: uppercase;
-  color: rgba(180,200,255,.3); margin-top: -.2rem;
+font-family: ‘Cormorant Garamond’, serif; font-style: italic;
+font-size: clamp(.85rem, 3vw, 1rem);
+letter-spacing: .45em; text-transform: uppercase;
+color: rgba(180,200,255,.3); margin-top: -.2rem;
 }
 .intro-btn {
-  margin-top: 3rem;
-  background: transparent;
-  border: 1px solid rgba(180,200,255,.35);
-  color: rgba(200,215,255,.75);
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(.85rem, 2.5vw, 1rem);
-  letter-spacing: .35em; text-transform: uppercase;
-  padding: 15px 44px;
-  border-radius: 1px;
-  /* CRITICAL for iOS: explicit touch-action and cursor */
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-appearance: none;
-  transition: border-color .25s, color .25s, background .25s;
-  /* Larger hit area on mobile */
-  min-width: 180px; min-height: 52px;
+margin-top: 3rem;
+background: transparent;
+border: 1px solid rgba(180,200,255,.35);
+color: rgba(200,215,255,.75);
+font-family: ‘Cormorant Garamond’, serif;
+font-size: clamp(.85rem, 2.5vw, 1rem);
+letter-spacing: .35em; text-transform: uppercase;
+padding: 15px 44px;
+border-radius: 1px;
+/* CRITICAL for iOS: explicit touch-action and cursor */
+cursor: pointer;
+touch-action: manipulation;
+-webkit-appearance: none;
+transition: border-color .25s, color .25s, background .25s;
+/* Larger hit area on mobile */
+min-width: 180px; min-height: 52px;
 }
 .intro-btn:hover  { border-color: rgba(200,220,255,.7); color: rgba(220,235,255,.95); background: rgba(160,180,255,.07); }
 .intro-btn:active { background: rgba(160,180,255,.15); }
 
 /* ════════════════════════════════
-   APP (camera view)
+APP (camera view)
 ════════════════════════════════ */
 #app {
-  position: fixed; inset: 0; z-index: 10;
-  background: #04040c;
-  display: none;
+position: fixed; inset: 0; z-index: 10;
+background: #04040c;
+display: none;
 }
 #app.active { display: block; }
 
 #videoEl {
-  position: absolute; opacity: 0; pointer-events: none;
-  width: 1px; height: 1px;
+position: absolute; opacity: 0; pointer-events: none;
+width: 1px; height: 1px;
 }
 
 /* Canvas positioned by JS */
 #mainCanvas {
-  position: absolute;
-  display: block;
-  touch-action: none;
+position: absolute;
+display: block;
+touch-action: none;
 }
 
 /* HUD overlay */
 #hud {
-  position: fixed; top: 0; left: 0; right: 0;
-  padding: max(env(safe-area-inset-top), 14px) 18px 8px;
-  display: flex; align-items: center; justify-content: space-between;
-  z-index: 50; pointer-events: none;
+position: fixed; top: 0; left: 0; right: 0;
+padding: max(env(safe-area-inset-top), 14px) 18px 8px;
+display: flex; align-items: center; justify-content: space-between;
+z-index: 50; pointer-events: none;
 }
 .hud-logo {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: .9rem; letter-spacing: .22em;
-  color: rgba(180,200,255,.5);
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: .9rem; letter-spacing: .22em;
+color: rgba(180,200,255,.5);
 }
 .hud-logo span { color: rgba(240,210,130,.55); }
 #phaseLabel {
-  font-family: 'Cormorant Garamond', serif; font-style: italic;
-  font-size: .68rem; letter-spacing: .16em;
-  color: rgba(180,200,255,.35);
+font-family: ‘Cormorant Garamond’, serif; font-style: italic;
+font-size: .68rem; letter-spacing: .16em;
+color: rgba(180,200,255,.35);
 }
 
 /* Bottom bar */
 #bottomBar {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  padding: 10px 20px max(env(safe-area-inset-bottom), 14px);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 50;
+position: fixed; bottom: 0; left: 0; right: 0;
+padding: 10px 20px max(env(safe-area-inset-bottom), 14px);
+display: flex; align-items: center; justify-content: center;
+z-index: 50;
 }
 .cam-btn {
-  background: rgba(160,180,255,.06);
-  border: 1px solid rgba(160,180,255,.2);
-  color: rgba(180,200,255,.65);
-  font-family: 'Cormorant Garamond', serif;
-  font-size: .7rem; letter-spacing: .2em; text-transform: uppercase;
-  padding: 10px 24px; border-radius: 1px;
-  cursor: pointer; touch-action: manipulation; -webkit-appearance: none;
-  transition: background .2s;
-  min-height: 44px;
+background: rgba(160,180,255,.06);
+border: 1px solid rgba(160,180,255,.2);
+color: rgba(180,200,255,.65);
+font-family: ‘Cormorant Garamond’, serif;
+font-size: .7rem; letter-spacing: .2em; text-transform: uppercase;
+padding: 10px 24px; border-radius: 1px;
+cursor: pointer; touch-action: manipulation; -webkit-appearance: none;
+transition: background .2s;
+min-height: 44px;
 }
 .cam-btn:active { background: rgba(160,180,255,.16); }
 
 /* Timer countdown text */
 #timerLbl {
-  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(4rem, 18vw, 8rem);
-  color: rgba(240,210,130,.9);
-  letter-spacing: .05em;
-  pointer-events: none; z-index: 60;
-  opacity: 0; transition: opacity .2s;
-  text-shadow: 0 0 40px rgba(240,210,130,.5), 0 0 80px rgba(240,210,130,.2);
+position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: clamp(4rem, 18vw, 8rem);
+color: rgba(240,210,130,.9);
+letter-spacing: .05em;
+pointer-events: none; z-index: 60;
+opacity: 0; transition: opacity .2s;
+text-shadow: 0 0 40px rgba(240,210,130,.5), 0 0 80px rgba(240,210,130,.2);
 }
 #timerLbl.show { opacity: 1; }
 
 /* Flash */
 #flash {
-  position: fixed; inset: 0; background: #fff; opacity: 0;
-  pointer-events: none; z-index: 900; transition: opacity .05s;
+position: fixed; inset: 0; background: #fff; opacity: 0;
+pointer-events: none; z-index: 900; transition: opacity .05s;
 }
 #flash.go { opacity: .55; }
 
 /* ════════════════════════════════
-   SAVE PAGE
+SAVE PAGE
 ════════════════════════════════ */
 #savePage {
-  position: fixed; inset: 0; z-index: 200;
-  display: none; flex-direction: column;
-  align-items: center; justify-content: center;
-  background: #080810;
+position: fixed; inset: 0; z-index: 200;
+display: none; flex-direction: column;
+align-items: center; justify-content: center;
+background: #080810;
 }
 #savePage.active { display: flex; }
 .save-bg {
-  position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 50% 40% at 30% 60%, rgba(60,80,180,.12) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 50% at 75% 30%, rgba(100,50,140,.10) 0%, transparent 70%);
+position: absolute; inset: 0; pointer-events: none;
+background:
+radial-gradient(ellipse 50% 40% at 30% 60%, rgba(60,80,180,.12) 0%, transparent 70%),
+radial-gradient(ellipse 40% 50% at 75% 30%, rgba(100,50,140,.10) 0%, transparent 70%);
 }
 #resultCanvas {
-  position: relative; z-index: 1; display: block;
-  border: 1px solid rgba(160,180,255,.12);
-  box-shadow: 0 0 60px rgba(100,120,200,.12);
-  /* JS sets exact size */
+position: relative; z-index: 1; display: block;
+border: 1px solid rgba(160,180,255,.12);
+box-shadow: 0 0 60px rgba(100,120,200,.12);
+/* JS sets exact size */
 }
 .save-actions {
-  position: relative; z-index: 1;
-  display: flex; gap: 12px; margin-top: 20px;
+position: relative; z-index: 1;
+display: flex; gap: 12px; margin-top: 20px;
 }
 .save-btn {
-  background: transparent;
-  border: 1px solid rgba(160,180,255,.28);
-  color: rgba(200,215,255,.72);
-  font-family: 'Cormorant Garamond', serif;
-  font-size: .78rem; letter-spacing: .25em; text-transform: uppercase;
-  padding: 12px 26px; border-radius: 1px;
-  cursor: pointer; touch-action: manipulation; -webkit-appearance: none;
-  transition: all .2s; min-height: 48px;
+background: transparent;
+border: 1px solid rgba(160,180,255,.28);
+color: rgba(200,215,255,.72);
+font-family: ‘Cormorant Garamond’, serif;
+font-size: .78rem; letter-spacing: .25em; text-transform: uppercase;
+padding: 12px 26px; border-radius: 1px;
+cursor: pointer; touch-action: manipulation; -webkit-appearance: none;
+transition: all .2s; min-height: 48px;
 }
 .save-btn:active { background: rgba(160,180,255,.12); }
 .save-btn.primary {
-  background: rgba(160,180,255,.1);
-  border-color: rgba(180,200,255,.5);
-  color: rgba(220,235,255,.9);
+background: rgba(160,180,255,.1);
+border-color: rgba(180,200,255,.5);
+color: rgba(220,235,255,.9);
 }
 .save-note {
-  position: relative; z-index: 1;
-  font-family: 'Cormorant Garamond', serif; font-style: italic;
-  font-size: .6rem; letter-spacing: .14em;
-  color: rgba(160,180,255,.28); margin-top: 10px;
+position: relative; z-index: 1;
+font-family: ‘Cormorant Garamond’, serif; font-style: italic;
+font-size: .6rem; letter-spacing: .14em;
+color: rgba(160,180,255,.28); margin-top: 10px;
 }
 
+/* Filter strip */
+.filter-strip {
+position: relative; z-index: 1;
+display: flex; gap: 8px; margin-top: 14px;
+flex-wrap: wrap; justify-content: center;
+}
+.filter-btn {
+background: rgba(160,180,255,.06);
+border: 1px solid rgba(160,180,255,.2);
+color: rgba(180,200,255,.6);
+font-family: ‘Cormorant Garamond’, serif;
+font-size: .65rem; letter-spacing: .15em; text-transform: uppercase;
+padding: 7px 14px; border-radius: 1px;
+cursor: pointer; touch-action: manipulation; -webkit-appearance: none;
+transition: all .2s; min-height: 36px;
+}
+.filter-btn.active {
+border-color: rgba(180,200,255,.55);
+color: rgba(220,235,255,.9);
+background: rgba(160,180,255,.14);
+}
+.filter-btn:active { background: rgba(160,180,255,.2); }
+
+/* Sticker row */
+.sticker-row {
+position: relative; z-index: 1;
+display: flex; gap: 8px; margin-top: 10px;
+align-items: center;
+}
+#stickerInput {
+background: rgba(160,180,255,.06);
+border: 1px solid rgba(160,180,255,.2);
+color: rgba(220,235,255,.85);
+font-family: ‘Cormorant Garamond’, serif; font-style: italic;
+font-size: .82rem; letter-spacing: .08em;
+padding: 8px 14px; border-radius: 1px; outline: none;
+width: 200px; -webkit-appearance: none;
+}
+#stickerInput::placeholder { color: rgba(160,180,255,.3); }
+#stickerInput:focus { border-color: rgba(180,200,255,.4); }
+.sticker-apply {
+background: rgba(160,180,255,.1);
+border: 1px solid rgba(180,200,255,.4);
+color: rgba(220,235,255,.9);
+font-size: .9rem; padding: 8px 14px;
+cursor: pointer; touch-action: manipulation; -webkit-appearance: none;
+border-radius: 1px; min-height: 36px; transition: all .2s;
+}
+.sticker-apply:active { background: rgba(160,180,255,.22); }
+
 /* ════════════════════════════════
-   ERROR BOX
+ERROR BOX
 ════════════════════════════════ */
 #errBox {
-  position: fixed; inset: 0; background: #080810;
-  display: none; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 14px; z-index: 950; padding: 32px; text-align: center;
+position: fixed; inset: 0; background: #080810;
+display: none; flex-direction: column;
+align-items: center; justify-content: center;
+gap: 14px; z-index: 950; padding: 32px; text-align: center;
 }
 #errBox.show { display: flex; }
 #errBox h2 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 2rem; color: #ff8080; letter-spacing: .1em;
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 2rem; color: #ff8080; letter-spacing: .1em;
 }
 #errBox p {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: .88rem; line-height: 1.9;
-  color: rgba(180,200,255,.6); max-width: 280px;
+font-family: ‘Cormorant Garamond’, serif;
+font-size: .88rem; line-height: 1.9;
+color: rgba(180,200,255,.6); max-width: 280px;
 }
 </style>
+
 </head>
 <body>
 
@@ -286,6 +338,7 @@ html, body {
 <div id="timerLbl"></div>
 
 <!-- ════════ INTRO ════════ -->
+
 <div id="intro">
   <div class="intro-bg"></div>
   <div class="intro-circles"></div>
@@ -302,6 +355,7 @@ html, body {
 </div>
 
 <!-- ════════ APP ════════ -->
+
 <div id="app">
   <video id="videoEl" playsinline autoplay muted webkit-playsinline x5-playsinline></video>
   <canvas id="mainCanvas"></canvas>
@@ -315,9 +369,28 @@ html, body {
 </div>
 
 <!-- ════════ SAVE ════════ -->
+
 <div id="savePage">
   <div class="save-bg"></div>
   <canvas id="resultCanvas"></canvas>
+
+  <!-- Filter strip -->
+
+  <div class="filter-strip" id="filterStrip">
+    <button class="filter-btn active" data-filter="none">Gốc</button>
+    <button class="filter-btn" data-filter="bw">B&W</button>
+    <button class="filter-btn" data-filter="vintage">Vintage</button>
+    <button class="filter-btn" data-filter="cinematic">Cinematic</button>
+    <button class="filter-btn" data-filter="cold">Lạnh</button>
+  </div>
+
+  <!-- Text sticker -->
+
+  <div class="sticker-row">
+    <input id="stickerInput" type="text" placeholder="Thêm chữ lên ảnh..." maxlength="40">
+    <button class="sticker-apply" id="applySticker">✦</button>
+  </div>
+
   <div class="save-actions">
     <button class="save-btn" id="retakeBtn">↺ Chụp lại</button>
     <button class="save-btn primary" id="saveBtn">↓ Lưu ảnh</button>
@@ -326,6 +399,7 @@ html, body {
 </div>
 
 <!-- ════════ ERROR ════════ -->
+
 <div id="errBox">
   <h2>Camera Error</h2>
   <p id="errMsg"></p>
@@ -333,7 +407,9 @@ html, body {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
 <script>
 'use strict';
 
@@ -358,6 +434,16 @@ document.getElementById('resetBtn') .addEventListener('click', resetAll);
 document.getElementById('retakeBtn').addEventListener('click', resetAll);
 document.getElementById('saveBtn')  .addEventListener('click', downloadPhoto);
 document.getElementById('retryBtn') .addEventListener('click', retryCamera);
+document.getElementById('applySticker').addEventListener('click', applySticker);
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilter(btn.dataset.filter);
+  });
+});
 
 // ── Canvas resolution ────────────────────────────────────────
 const CAM_W = 640, CAM_H = 480;
@@ -423,19 +509,28 @@ function drawVideo() {
   ctx.restore();
 }
 
-// ── Build quad from 4 fingertips ────────────────────────────
-// pt0 = h0 thumb(4), pt1 = h0 index(8)
-// pt2 = h1 thumb(4), pt3 = h1 index(8)
-// Draw order for non-crossing quad: pt0→pt2→pt3→pt1
+// ── Build quad from 4 fingertips, sorted by position ────────
+// Sort into: top-left, top-right, bottom-right, bottom-left
+// so the quad never crosses regardless of which hand MediaPipe
+// labels as hands[0] vs hands[1]
 function getQuad(hands) {
-  return {
-    pt0: lm(hands[0], 4),
-    pt1: lm(hands[0], 8),
-    pt2: lm(hands[1], 4),
-    pt3: lm(hands[1], 8),
-  };
+  const pts = [
+    lm(hands[0], 4), // h0 thumb
+    lm(hands[0], 8), // h0 index
+    lm(hands[1], 4), // h1 thumb
+    lm(hands[1], 8), // h1 index
+  ];
+
+  // Find centroid
+  const cx = pts.reduce((s,p)=>s+p.x,0)/4;
+  const cy = pts.reduce((s,p)=>s+p.y,0)/4;
+
+  // Sort by angle from centroid → consistent clockwise order
+  pts.sort((a,b) => Math.atan2(a.y-cy,a.x-cx) - Math.atan2(b.y-cy,b.x-cx));
+
+  return { pt0:pts[0], pt1:pts[1], pt2:pts[2], pt3:pts[3] };
 }
-function quadPts(q) { return [q.pt0, q.pt2, q.pt3, q.pt1]; }
+function quadPts(q) { return [q.pt0, q.pt1, q.pt2, q.pt3]; }
 
 function quadBBox(q) {
   const xs = [q.pt0.x, q.pt1.x, q.pt2.x, q.pt3.x];
@@ -465,9 +560,30 @@ function isStable(bb) {
   return d < 25;
 }
 
-// ── Flash ────────────────────────────────────────────────────
+// ── Shutter click (AudioContext, no file needed) ─────────────
+function playShutter() {
+  try {
+    const ac  = new (window.AudioContext || window.webkitAudioContext)();
+    const buf = ac.createBuffer(1, ac.sampleRate * 0.07, ac.sampleRate);
+    const ch  = buf.getChannelData(0);
+    for (let i = 0; i < ch.length; i++)
+      ch[i] = (Math.random()*2-1) * Math.exp(-i/(ac.sampleRate*0.01));
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const hp = ac.createBiquadFilter();
+    hp.type = 'highpass'; hp.frequency.value = 800;
+    const gain = ac.createGain();
+    gain.gain.value = 0.6;
+    src.connect(hp); hp.connect(gain); gain.connect(ac.destination);
+    src.start();
+    setTimeout(() => ac.close(), 300);
+  } catch(e) { /* silent fail */ }
+}
+
+// ── Flash + shutter ──────────────────────────────────────────
 function doFlash() {
   flash.classList.add('go');
+  playShutter();
   setTimeout(() => flash.classList.remove('go'), 120);
 }
 
@@ -584,7 +700,7 @@ function captureShot1(q, bb) {
   // Start auto countdown immediately — no hands needed
   const shot2Start = Date.now();
   function shot2Tick() {
-    if (phase !== 'shot2') return; // cancelled by resetAll
+    if (phase !== 'shot2') return;
     const elapsed  = Date.now() - shot2Start;
     const progress = Math.min(elapsed / SHOT2_MS, 1);
     const sec      = Math.ceil((SHOT2_MS - elapsed) / 1000);
@@ -595,7 +711,7 @@ function captureShot1(q, bb) {
 
     if (progress >= 1) {
       timerLbl.classList.remove('show');
-      captureShot2(window._shot1Q, window._shot1BB);
+      setTimeout(() => captureShot2(window._shot1Q, window._shot1BB), 600);
     } else {
       requestAnimationFrame(shot2Tick);
     }
@@ -604,32 +720,57 @@ function captureShot1(q, bb) {
 }
 
 // ── SHOT 2: freeze inside the frame ─────────────────────────
+// We find the actual transparent hole in frozenBg to get
+// the exact crop region — not the stale shot1 coordinates.
 function captureShot2(q, bb) {
   doFlash();
+
+  // Find bounding box of transparent (alpha=0) pixels in frozenBg
+  const scanCtx = frozenBg.getContext('2d');
+  const imgd    = scanCtx.getImageData(0, 0, CAM_W, CAM_H);
+  const data    = imgd.data;
+  let minX=CAM_W, minY=CAM_H, maxX=0, maxY=0, found=false;
+  for (let y=0; y<CAM_H; y++) {
+    for (let x=0; x<CAM_W; x++) {
+      const a = data[(y*CAM_W+x)*4+3];
+      if (a < 10) { // transparent = inside the hole
+        if (x<minX) minX=x; if (x>maxX) maxX=x;
+        if (y<minY) minY=y; if (y>maxY) maxY=y;
+        found=true;
+      }
+    }
+  }
+
+  // Fallback to shot1 bb if scan fails
+  const cropBB = found
+    ? { x:minX, y:minY, w:maxX-minX, h:maxY-minY }
+    : bb;
+
   const tmp = document.createElement('canvas');
-  tmp.width = bb.w; tmp.height = bb.h;
+  tmp.width = cropBB.w; tmp.height = cropBB.h;
   const tc = tmp.getContext('2d');
-  // Draw mirrored crop from buffer
-  tc.save(); tc.translate(bb.w,0); tc.scale(-1,1);
-  tc.drawImage(frameBuf, bb.x, bb.y, bb.w, bb.h, 0, 0, bb.w, bb.h);
+  tc.save(); tc.translate(cropBB.w,0); tc.scale(-1,1);
+  tc.drawImage(frameBuf, cropBB.x, cropBB.y, cropBB.w, cropBB.h, 0, 0, cropBB.w, cropBB.h);
   tc.restore();
-  frozenFace = { img: tmp, bb };
-  composeFinal(q, bb);
+  frozenFace = { img: tmp, bb: cropBB };
+  composeFinal(q, cropBB);
   showSave();
 }
 
 // ── Compose final image ──────────────────────────────────────
 function composeFinal(q, bb) {
   rctx.clearRect(0, 0, CAM_W, CAM_H);
-  // Outside (frozen bg with hole)
+  // Outside (frozen bg with hole) — uses shot1 quad shape
   rctx.drawImage(frozenBg, 0, 0);
-  // Inside (frozen face)
-  const pts = quadPts(q);
+
+  // Inside: clip to the hole shape (shot1 quad) then draw face
+  const pts = quadPts(window._shot1Q || q);
   rctx.save();
   rctx.beginPath();
   rctx.moveTo(pts[0].x, pts[0].y);
   for (let i=1;i<pts.length;i++) rctx.lineTo(pts[i].x, pts[i].y);
   rctx.closePath(); rctx.clip();
+  // Draw face image into the bounding box of the hole
   rctx.drawImage(frozenFace.img, bb.x, bb.y, bb.w, bb.h);
   rctx.fillStyle = 'rgba(140,170,255,.06)'; rctx.fillRect(0,0,CAM_W,CAM_H);
   rctx.restore();
@@ -648,11 +789,108 @@ function composeFinal(q, bb) {
   rctx.fillStyle=vg; rctx.fillRect(0,0,CAM_W,CAM_H);
 }
 
+// ── Filter & sticker ─────────────────────────────────────────
+let _baseImageData = null; // clean copy before filter/sticker
+
+const FILTERS = {
+  none:      null,
+  bw:        { grayscale: true },
+  vintage:   { sepia: true,  brightness: 1.05, contrast: 0.92, vignette: true },
+  cinematic: { teal: true,   brightness: 0.92, contrast: 1.12, vignette: true },
+  cold:      { cold: true,   brightness: 1.02, contrast: 1.05 },
+};
+
+function saveBaseImage() {
+  // Store clean pixel data so filters are non-destructive
+  _baseImageData = rctx.getImageData(0, 0, CAM_W, CAM_H);
+}
+
+function applyFilter(name) {
+  if (!_baseImageData) return;
+  // Restore clean base
+  rctx.putImageData(_baseImageData, 0, 0);
+
+  const f = FILTERS[name];
+  if (!f) return;
+
+  const imgd = rctx.getImageData(0, 0, CAM_W, CAM_H);
+  const d = imgd.data;
+
+  for (let i = 0; i < d.length; i += 4) {
+    let r = d[i], g = d[i+1], b = d[i+2];
+
+    if (f.grayscale) {
+      const gray = r*0.299 + g*0.587 + b*0.114;
+      r = g = b = gray;
+    }
+    if (f.sepia) {
+      const nr = r*0.393 + g*0.769 + b*0.189;
+      const ng = r*0.349 + g*0.686 + b*0.168;
+      const nb = r*0.272 + g*0.534 + b*0.131;
+      r = nr; g = ng; b = nb;
+    }
+    if (f.teal) { // cinematic: lift shadows teal, cool highlights
+      r = r * 0.85;
+      b = Math.min(255, b * 1.18 + 12);
+      g = Math.min(255, g * 1.04 + 6);
+    }
+    if (f.cold) {
+      r = r * 0.88;
+      b = Math.min(255, b * 1.2);
+    }
+    if (f.brightness && f.brightness !== 1) {
+      r *= f.brightness; g *= f.brightness; b *= f.brightness;
+    }
+    if (f.contrast && f.contrast !== 1) {
+      const c = f.contrast;
+      r = (r - 128) * c + 128;
+      g = (g - 128) * c + 128;
+      b = (b - 128) * c + 128;
+    }
+    d[i]   = Math.max(0, Math.min(255, r));
+    d[i+1] = Math.max(0, Math.min(255, g));
+    d[i+2] = Math.max(0, Math.min(255, b));
+  }
+  rctx.putImageData(imgd, 0, 0);
+
+  if (f.vignette) {
+    const vg = rctx.createRadialGradient(CAM_W/2,CAM_H/2,CAM_H*.2,CAM_W/2,CAM_H/2,CAM_H*.85);
+    vg.addColorStop(0,'transparent');
+    vg.addColorStop(1,'rgba(0,0,0,.45)');
+    rctx.fillStyle = vg; rctx.fillRect(0,0,CAM_W,CAM_H);
+  }
+}
+
+function applySticker() {
+  const text = document.getElementById('stickerInput').value.trim();
+  if (!text) return;
+  // Re-apply current filter first (so sticker goes on top)
+  const active = document.querySelector('.filter-btn.active');
+  if (active) applyFilter(active.dataset.filter);
+  // Draw text centered at bottom of image
+  rctx.save();
+  const fs = Math.round(CAM_H * 0.065);
+  rctx.font = `300 italic ${fs}px Cormorant Garamond, serif`;
+  rctx.textAlign = 'center';
+  rctx.shadowColor = 'rgba(0,0,0,.6)'; rctx.shadowBlur = 12;
+  rctx.fillStyle = 'rgba(240,235,220,.92)';
+  rctx.fillText(text, CAM_W/2, CAM_H - fs * 0.8);
+  rctx.restore();
+  // Update base so sticker is baked in
+  _baseImageData = rctx.getImageData(0, 0, CAM_W, CAM_H);
+  document.getElementById('stickerInput').value = '';
+}
+
 // ── Show save page ───────────────────────────────────────────
 function showSave() {
   phase = 'save';
   timerLbl.classList.remove('show');
+  // Reset filter strip
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.filter-btn[data-filter="none"]').classList.add('active');
   saveEl.classList.add('active');
+  // Store clean base after slight delay (let composeFinal finish)
+  setTimeout(saveBaseImage, 50);
 }
 
 // ── Reset everything ─────────────────────────────────────────
@@ -834,5 +1072,6 @@ function startApp() {
 // Only block scroll on canvas, not entire body
 canvas.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 </script>
+
 </body>
 </html>
